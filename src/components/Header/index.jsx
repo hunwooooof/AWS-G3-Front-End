@@ -178,6 +178,51 @@ const PageLink = styled(Link)`
   }
 `;
 
+const CollapsibleMenu = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 15px;
+  position: absolute;
+  top: 85px;
+  right: 55px;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0px 0px 3px #313538;
+  @media screen and (max-width: 1279px) {
+    gap: 10px;
+    top: -180px;
+    right: 10px;
+    bottom: 70px;
+    background: #313538;
+    border-radius: 8px;
+    box-shadow: none;
+    border: 0.5px solid white;
+    padding: 10px;
+  }
+`;
+
+const CollapsibleMenuLink = styled(Link)`
+  text-decoration: none;
+  font-size: 20px;
+  color: #313538;
+  cursor: pointer;
+  padding: 10px 20px;
+  &:hover {
+    color: #8b572a;
+  }
+  @media screen and (max-width: 1279px) {
+    text-decoration: none;
+    font-size: 16px;
+    color: #bbb;
+
+    &:hover {
+      color: white;
+    }
+  }
+`;
+
 const PageLinkIcon = styled.div`
   width: 44px;
   height: 44px;
@@ -242,7 +287,7 @@ const categories = [
 
 function Header() {
   const [inputValue, setInputValue] = useState('');
-  const { user } = useContext(AuthContext)
+  const { user } = useContext(AuthContext);
   const { cartCount } = useContext(CartContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -254,7 +299,7 @@ function Header() {
 
   return (
     <Wrapper>
-      <Logo to="/" />
+      <Logo to='/' />
       <CategoryLinks>
         {categories.map(({ name, displayText }, index) => (
           <CategoryLink
@@ -266,8 +311,7 @@ function Header() {
                 behavior: 'smooth',
               });
               navigate(`/?category=${name}`);
-            }}
-          >
+            }}>
             {displayText}
           </CategoryLink>
         ))}
@@ -282,16 +326,21 @@ function Header() {
         value={inputValue}
       />
       <PageLinks>
-        <PageLink to="/checkout">
+        <PageLink to='/checkout'>
           <PageLinkCartIcon icon={cart}>
             <PageLinkIconNumber>{cartCount}</PageLinkIconNumber>
           </PageLinkCartIcon>
           <PageLinkText>購物車</PageLinkText>
         </PageLink>
-        <PageLink to="/profile">
+        <PageLink to='/profile'>
           <PageLinkProfileIcon icon={profile} url={user?.picture} />
           <PageLinkText>會員</PageLinkText>
         </PageLink>
+        <CollapsibleMenu>
+          <CollapsibleMenuLink to='/collection'>我的收藏</CollapsibleMenuLink>
+          <CollapsibleMenuLink to='/coupon'>我的優惠券</CollapsibleMenuLink>
+          <CollapsibleMenuLink to='/profile'>會員登入</CollapsibleMenuLink>
+        </CollapsibleMenu>
       </PageLinks>
     </Wrapper>
   );
