@@ -180,7 +180,7 @@ const PageLink = styled(Link)`
 
 const CollapsibleMenu = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   justify-content: center;
   gap: 15px;
   position: absolute;
@@ -292,13 +292,18 @@ function Header() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category');
+  const [isProfileMenuShow, setIsProfileMenuShow] = useState(false);
 
   useEffect(() => {
     if (category) setInputValue('');
   }, [category]);
 
+  const handleProfileMenuShow = () => {
+    isProfileMenuShow ? setIsProfileMenuShow(false) : setIsProfileMenuShow(true);
+  };
+
   return (
-    <Wrapper>
+    <Wrapper onClick={handleProfileMenuShow}>
       <Logo to='/' />
       <CategoryLinks>
         {categories.map(({ name, displayText }, index) => (
@@ -332,15 +337,19 @@ function Header() {
           </PageLinkCartIcon>
           <PageLinkText>購物車</PageLinkText>
         </PageLink>
-        <PageLink to='/profile'>
+        <PageLink onClick={handleProfileMenuShow}>
           <PageLinkProfileIcon icon={profile} url={user?.picture} />
           <PageLinkText>會員</PageLinkText>
         </PageLink>
-        <CollapsibleMenu>
-          <CollapsibleMenuLink to='/collection'>我的收藏</CollapsibleMenuLink>
-          <CollapsibleMenuLink to='/coupon'>我的優惠券</CollapsibleMenuLink>
-          <CollapsibleMenuLink to='/profile'>會員登入</CollapsibleMenuLink>
-        </CollapsibleMenu>
+        {isProfileMenuShow && (
+          <CollapsibleMenu>
+            <CollapsibleMenuLink to='/collection'>我的收藏</CollapsibleMenuLink>
+            <CollapsibleMenuLink to='/coupon'>我的優惠券</CollapsibleMenuLink>
+            <CollapsibleMenuLink to='/profile'>
+              {JSON.stringify(user) === '{}' ? '會員登入' : '會員資料'}
+            </CollapsibleMenuLink>
+          </CollapsibleMenu>
+        )}
       </PageLinks>
     </Wrapper>
   );
