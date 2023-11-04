@@ -21,7 +21,7 @@ const Wrapper = styled.div`
 
 const Title = styled.h2`
   line-height: 1.5;
-  font-size: 33px;
+  font-size: 38px;
   letter-spacing: 6.4px;
   color: #3f3a3a;
   margin-bottom: 48px;
@@ -47,8 +47,12 @@ const Tag = styled.div`
   line-height: 36px;
   font-size: 20px;
   padding: 20px;
-  color: #3f3a3a; //8b572a
-  border-bottom: 3px solid #8b572a;
+  color: ${(props) => (props.$isActive ? '#8b572a' : '#3f3a3a')};
+  border-bottom: ${(props) => (props.$isActive ? '3px solid #8b572a' : 'none')};
+  &:hover {
+    cursor: pointer;
+    color: #8b572a;
+  }
   @media screen and (max-width: 1279px) {
     font-size: 14px;
     padding: 10px;
@@ -56,17 +60,12 @@ const Tag = styled.div`
 `;
 
 const Section = styled.section`
+  margin: 0 100px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-column-gap: 50px;
+  grid-template-columns: 1fr;
   grid-row-gap: 40px;
   @media screen and (max-width: 1279px) {
-    grid-template-columns: 430px;
-    grid-column-gap: 0px;
-    margin: 0 auto;
-  }
-  @media screen and (max-width: 579px) {
-    grid-template-columns: 1fr;
+    margin: 0;
   }
 `;
 
@@ -81,9 +80,9 @@ const Item = styled.div`
 `;
 
 const Img = styled.img`
-  width: 160px;
+  width: 30%;
   @media screen and (max-width: 1279px) {
-    width: 120px;
+    width: 40%;
   }
 `;
 
@@ -94,7 +93,10 @@ const ItemDetail = styled.div`
   justify-content: space-between;
   padding: 20px;
   @media screen and (max-width: 1279px) {
-    padding: 10px;
+    padding: 10% 30px;
+  }
+  @media screen and (max-width: 479px) {
+    padding: 30px 10px;
   }
 `;
 
@@ -105,37 +107,54 @@ const ItemInfo = styled.div`
 `;
 
 const ItemInfoName = styled.div`
-  font-size: 24px;
+  letter-spacing: 1.2px;
+  font-weight: bold;
+  font-size: 28px;
   @media screen and (max-width: 1279px) {
-    font-size: 16px;
+    font-size: 24px;
+  }
+  @media screen and (max-width: 479px) {
+    font-size: 14px;
   }
 `;
 
 const GetButton = styled.button`
+  white-space: nowrap;
   background-color: #3f3a3a;
   color: white;
   border: none;
   padding: 10px 20px;
   font-size: 20px;
+
   &:hover {
-    background-color: #bababa;
-    color: #3f3a3a;
     cursor: pointer;
+    box-shadow: 0px 0px 5px #a1a1a1;
   }
-  @media screen and (max-width: 1279px) {
-    font-size: 14px;
-    padding: 5px 10px;
+  &:disabled {
+    cursor: not-allowed;
+    background-color: #bababa;
+    color: white;
+    box-shadow: none;
+  }
+  @media screen and (max-width: 479px) {
+    font-size: 12px;
+    padding: 5px;
   }
 `;
 
 const ExpireDate = styled.div`
-  color: #3f3a3a;
+  font-size: 24px;
+  color: #504d4d;
   @media screen and (max-width: 1279px) {
+    font-size: 20px;
+  }
+  @media screen and (max-width: 479px) {
     font-size: 14px;
   }
 `;
 
 const warning = styled.div`
+  letter-spacing: 2px;
   margin-top: 50px;
   text-align: center;
   font-size: 36px;
@@ -153,7 +172,16 @@ const Loading = styled(warning)`
 `;
 
 function Coupon() {
+  const [couponsTag, setCouponsTag] = useState('All');
   const [allCoupons, setAllCoupons] = useState(null);
+  const [userCoupons, setUserCoupons] = useState(null);
+  const coupons =
+    couponsTag === 'All'
+      ? allCoupons
+      : couponsTag === 'UserCoupons'
+      ? userCoupons.filter((coupon) => !coupon.isUsed)
+      : userCoupons.filter((coupon) => coupon.isUsed);
+
   useEffect(() => {
     async function getAllCoupons() {
       const { data } = await ec2Api.getAllCoupons();
@@ -163,18 +191,45 @@ function Coupon() {
     getAllCoupons();
   }, []);
 
+  useEffect(() => {
+    async function getUserCoupons() {
+      const { data } = await ec2Api.getUserCoupons();
+      setUserCoupons(data);
+      console.log(data);
+    }
+    getUserCoupons();
+  }, []);
+
+  const handleCouponTag = (e) => {
+    setCouponsTag(e.target.id);
+  };
+
+  // const handleClaimCoupon = (jwtToken) => {
+  //   async function postClaimCoupon() {
+  //     const { data } = await ec2Api.postClaimCoupon(jwtToken);
+  //     console.log(data);
+  //   }
+  //   postClaimCoupon();
+  // };
+
   return (
     <Wrapper>
       <Title>優惠券專區</Title>
       <SubTitle>
-        <Tag>未領取</Tag>
-        <Tag>已領取</Tag>
-        <Tag>歷史紀錄</Tag>
+        <Tag id='All' onClick={handleCouponTag} $isActive={couponsTag === 'All'}>
+          未領取
+        </Tag>
+        <Tag id='UserCoupons' onClick={handleCouponTag} $isActive={couponsTag === 'UserCoupons'}>
+          已領取
+        </Tag>
+        <Tag id='CouponHistory' onClick={handleCouponTag} $isActive={couponsTag === 'CouponHistory'}>
+          歷史紀錄
+        </Tag>
       </SubTitle>
       <Section>
-        {allCoupons ? (
-          allCoupons.length > 0 ? (
-            allCoupons.map((coupon) => {
+        {coupons ? (
+          coupons.length > 0 && userCoupons ? (
+            coupons.map((coupon) => {
               const couponImg = coupon.couponType === '折扣' ? discountImage : freeFreightImage;
               return (
                 <Item key={coupon.couponId}>
@@ -182,7 +237,13 @@ function Coupon() {
                   <ItemDetail>
                     <ItemInfo>
                       <ItemInfoName>{coupon.couponTitle}</ItemInfoName>
-                      <GetButton>領取</GetButton>
+                      {couponsTag === 'All' ? (
+                        userCoupons.some((userCoupon) => userCoupon.couponId === coupon.couponId) ? (
+                          <GetButton disabled>已領取</GetButton>
+                        ) : (
+                          <GetButton>領取</GetButton>
+                        )
+                      ) : null}
                     </ItemInfo>
                     <ExpireDate>有效期限：{coupon.couponExpiredDate}</ExpireDate>
                   </ItemDetail>
