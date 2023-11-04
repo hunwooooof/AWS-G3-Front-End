@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import ReactLoading from 'react-loading';
 import styled from 'styled-components';
 import api from '../../utils/api';
 import discountImage from './discount.webp';
+import freeFreightImage from './free-freight-fee.webp';
+import ec2Api from '../../utils/ec2Api';
 
 const Wrapper = styled.div`
   max-width: 960px;
@@ -80,7 +83,7 @@ const Item = styled.div`
 const Img = styled.img`
   width: 160px;
   @media screen and (max-width: 1279px) {
-    width: 80px;
+    width: 120px;
   }
 `;
 
@@ -132,16 +135,33 @@ const ExpireDate = styled.div`
   }
 `;
 
-function Coupon() {
-  //   useEffect(() => {
-  // async function getProduct() {
-  //   const { data } = await api.getProduct(id);
-  //   setProduct(data);
-  // }
-  // getProduct();
-  // }, [id]);
+const warning = styled.div`
+  margin-top: 50px;
+  text-align: center;
+  font-size: 36px;
+  @media screen and (max-width: 1279px) {
+    font-size: 20px;
+  }
+`;
 
-  // if (!product) return null;
+const NoCoupon = styled(warning)`
+  color: #cbcbcb;
+`;
+
+const Loading = styled(warning)`
+  color: #cbcbcb;
+`;
+
+function Coupon() {
+  const [allCoupons, setAllCoupons] = useState(null);
+  useEffect(() => {
+    async function getAllCoupons() {
+      const { data } = await ec2Api.getAllCoupons();
+      setAllCoupons(data);
+      console.log(data);
+    }
+    getAllCoupons();
+  }, []);
 
   return (
     <Wrapper>
@@ -152,36 +172,29 @@ function Coupon() {
         <Tag>歷史紀錄</Tag>
       </SubTitle>
       <Section>
-        <Item>
-          <Img src={discountImage} alt='' />
-          <ItemDetail>
-            <ItemInfo>
-              <ItemInfoName>折扣</ItemInfoName>
-              <GetButton>領取</GetButton>
-            </ItemInfo>
-            <ExpireDate>有效期限：2023-12-25</ExpireDate>
-          </ItemDetail>
-        </Item>
-        <Item>
-          <Img src={discountImage} alt='' />
-          <ItemDetail>
-            <ItemInfo>
-              <ItemInfoName>折扣</ItemInfoName>
-              <GetButton>領取</GetButton>
-            </ItemInfo>
-            <ExpireDate>有效期限：2023-12-25</ExpireDate>
-          </ItemDetail>
-        </Item>
-        <Item>
-          <Img src={discountImage} alt='' />
-          <ItemDetail>
-            <ItemInfo>
-              <ItemInfoName>折扣</ItemInfoName>
-              <GetButton>領取</GetButton>
-            </ItemInfo>
-            <ExpireDate>有效期限：2023-12-25</ExpireDate>
-          </ItemDetail>
-        </Item>
+        {allCoupons ? (
+          allCoupons.length > 0 ? (
+            allCoupons.map((coupon) => {
+              const couponImg = coupon.couponType === '折扣' ? discountImage : freeFreightImage;
+              return (
+                <Item key={coupon.couponId}>
+                  <Img src={couponImg} alt='coupon.couponTitle' />
+                  <ItemDetail>
+                    <ItemInfo>
+                      <ItemInfoName>{coupon.couponTitle}</ItemInfoName>
+                      <GetButton>領取</GetButton>
+                    </ItemInfo>
+                    <ExpireDate>有效期限：{coupon.couponExpiredDate}</ExpireDate>
+                  </ItemDetail>
+                </Item>
+              );
+            })
+          ) : (
+            <NoCoupon>目前沒有優惠券唷！</NoCoupon>
+          )
+        ) : (
+          <Loading>載入優惠券中⋯</Loading>
+        )}
       </Section>
     </Wrapper>
   );
