@@ -62,6 +62,8 @@ const ID = styled.div`
 `;
 
 const Price = styled.div`
+  display: flex;
+  justify-content: space-between;
   line-height: 36px;
   margin-top: 40px;
   font-size: 30px;
@@ -74,6 +76,16 @@ const Price = styled.div`
     margin-top: 20px;
     font-size: 20px;
     padding-bottom: 10px;
+  }
+`;
+
+const HeartIcon = styled.span`
+  font-family: 'Material Icons';
+  font-size: 40px;
+  cursor: pointer;
+  color: ${(props) => (props.isLiked ? '#d25e5a' : '#787575')};
+  @media screen and (max-width: 1279px) {
+    font-size: 36px;
   }
 `;
 
@@ -192,6 +204,11 @@ const Image = styled.img`
 function Product() {
   const [product, setProduct] = useState();
   const { id } = useParams();
+  const [isLiked, setIsLiked] = useState(true);
+
+  const toggleLike = () => {
+    setIsLiked(!isLiked);
+  };
 
   useEffect(() => {
     async function getProduct() {
@@ -209,7 +226,12 @@ function Product() {
       <Details>
         <Title>{product.title}</Title>
         <ID>{product.id}</ID>
-        <Price>TWD.{product.price}</Price>
+        <Price>
+          TWD.{product.price}
+          <HeartIcon className='material-icons' onClick={toggleLike} isLiked={isLiked}>
+            {isLiked ? ' favorite' : 'favorite_border'}
+          </HeartIcon>
+        </Price>
         <ProductVariants product={product} />
         <Note>{product.note}</Note>
         <Texture>{product.texture}</Texture>
