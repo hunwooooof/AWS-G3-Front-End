@@ -204,7 +204,7 @@ const Image = styled.img`
 `;
 
 function Product() {
-  const { isLogin } = useContext(AuthContext);
+  const { isLogin, jwtToken } = useContext(AuthContext);
   const { id } = useParams();
   const [product, setProduct] = useState();
   const [isLiked, setIsLiked] = useState(false);
@@ -221,15 +221,8 @@ function Product() {
     getProduct();
   }, [id]);
 
-  /*
-  初始載入
-    登入：
-      有在收藏清單：isLiked
-    登出：
-      有在localStorage：isLiked
-   */
   useEffect(() => {
-    const checkIsCollected = async () => {
+    const getInitialCollectStatus = async () => {
       if (isLogin) {
         const { data } = await ec2Api.getCollection();
         const userCollections = data.products;
@@ -251,48 +244,20 @@ function Product() {
         }
       }
     };
-    checkIsCollected();
+    getInitialCollectStatus();
   }, [id]);
 
-  /*
-  點擊收藏
-    登入：打api包含id&token
-    登出：更新localStorage
-  移除收藏
-    登入：打api包含id&token
-    登出：更新localStorage
-
-  */
-  // useEffect(() => {
-  //   const localCollection = JSON.parse(localStorage.getItem('collection'));
-  //   if (isLiked) {
-  //     if (isLogin) {
-  //       const checkIsCollected = async () => {
-  //         const isCollected = (await ec2Api.getCollection()).data.products.find((item) => {
-  //           return item.id === product.id;
-  //         });
-  //         if (!isCollected) {
-  //           ec2Api.addCollection(product.id);
-  //         }
-  //       };
-  //       checkIsCollected();
-  //     } else {
-  //       const isLocalCollected = localCollection.find((item) => {
-  //         return item === product.id;
-  //       });
-  //       if (!isLocalCollected) {
-  //         localStorage.setItem('collection', JSON.stringify([...localCollection, product.id]));
-  //       }
-  //     }
-  //   } else {
-  //     if (isLogin) {
-  //       ec2Api.deleteCollection(product.id);
-  //     } else {
-  //       const updatedList = localCollection.filter((item) => item !== product.id);
-  //       localStorage.setItem('collection', JSON.stringify(updatedList));
-  //     }
-  //   }
-  // }, [isLiked]);
+  useEffect(() => {
+    const localCollection = JSON.parse(localStorage.getItem('collection'));
+    const updatedList = localCollection.filter((item) => item !== product.id);
+    isLiked
+      ? isLogin
+        ? ec2Api.addCollection(product.id, jwtToken)
+        : localStorage.setItem('collection', JSON.stringify([...localCollection, product.id]))
+      : isLogin
+      ? ec2Api.deleteCollection(product.id, jwtToken)
+      : localStorage.setItem('collection', JSON.stringify(updatedList));
+  }, [product, isLiked]);
 
   if (!product) return null;
 
