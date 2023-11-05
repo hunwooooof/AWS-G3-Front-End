@@ -19,34 +19,16 @@ const ec2Api = {
     const response = await fetch(`${this.hostname}/api/v1/coupons`);
     return await response.json();
   },
-
-  // async searchProducts(keyword, paging) {
-  //   const response = await fetch(
-  //     `${this.hostname}/products/search?keyword=${keyword}&paging=${paging}`
-  //   );
-  //   return await response.json();
-  // },
-
-  // async signin(data) {
-  //   const response = await fetch(`${this.hostname}/user/signin`, {
-  //     body: JSON.stringify(data),
-  //     headers: new Headers({
-  //       'Content-Type': 'application/json',
-  //     }),
-  //     method: 'POST',
-  //   });
-  //   return await response.json();
-  // },
-
-  // async getProfile(jwtToken) {
-  //   const response = await fetch(`${this.hostname}/user/profile`, {
-  //     headers: new Headers({
-  //       'Content-Type': 'application/json',
-  //       Authorization: `Bearer ${jwtToken}`,
-  //     }),
-  //   });
-  //   return await response.json();
-  // },
+  async signin(data) {
+    const response = await fetch(`${this.hostname}/api/user/signin`, {
+      body: JSON.stringify(data),
+      headers: new Headers({
+        'Content-Type': 'application/json',
+      }),
+      method: 'POST',
+    });
+    return await response.json();
+  },
 };
 
 export default ec2Api;
