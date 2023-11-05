@@ -1,11 +1,7 @@
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import api from '../utils/api';
 import fb from '../utils/fb';
+import ec2Api from '../utils/ec2Api';
 
 export const AuthContext = createContext({
   isLogin: false,
@@ -14,6 +10,7 @@ export const AuthContext = createContext({
   jwtToken: '',
   login: () => {},
   logout: () => {},
+  nativeLogin: () => {},
 });
 
 export const AuthContextProvider = ({ children }) => {
@@ -30,6 +27,7 @@ export const AuthContextProvider = ({ children }) => {
     });
     const { access_token: tokenFromServer, user: userData } = data;
     setUser(userData);
+    console.log(userData);
     setJwtToken(tokenFromServer);
     window.localStorage.setItem('jwtToken', tokenFromServer);
     setIsLogin(true);
@@ -47,7 +45,7 @@ export const AuthContextProvider = ({ children }) => {
         window.localStorage.removeItem('jwtToken');
         setLoading(false);
       }
-    }
+    };
     checkAuthStatus();
   }, [handleLoginResponse]);
 
@@ -63,17 +61,41 @@ export const AuthContextProvider = ({ children }) => {
       setLoading(false);
       return null;
     }
-  }
+  };
+
+  const nativeLogin = async (body) => {
+    setLoading(true);
+    const { data } = await ec2Api.signin(body);
+    console.log(data);
+    if (data) {
+      const { user } = data;
+      const accessToken = data.access_token;
+      setUser(user);
+      setJwtToken(accessToken);
+      window.localStorage.setItem('jwtToken', accessToken);
+      setLoading(false);
+      setIsLogin(true);
+      return accessToken;
+    } else {
+      window.localStorage.removeItem('jwtToken');
+      setLoading(false);
+      return null;
+    }
+  };
 
   const logout = async () => {
     setLoading(true);
-    await fb.logout();
-    setIsLogin(false);
-    setUser({});
-    setJwtToken();
-    window.localStorage.removeItem('jwtToken');
-    setLoading(false);
-  }
+    try {
+      setIsLogin(false);
+      setUser({});
+      setJwtToken();
+      window.localStorage.removeItem('jwtToken');
+      setLoading(false);
+      await fb.logout();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -83,10 +105,10 @@ export const AuthContextProvider = ({ children }) => {
         loading,
         jwtToken,
         login,
+        nativeLogin,
         logout,
-      }}
-    >
+      }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
