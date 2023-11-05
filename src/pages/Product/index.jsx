@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import api from '../../utils/api';
+import ec2Api from '../../utils/ec2Api';
 import ProductVariants from './ProductVariants';
+import { AuthContext } from '../../context/authContext';
 
 const Wrapper = styled.div`
   max-width: 960px;
@@ -83,7 +85,7 @@ const HeartIcon = styled.span`
   font-family: 'Material Icons';
   font-size: 40px;
   cursor: pointer;
-  color: ${(props) => (props.isLiked ? '#d25e5a' : '#787575')};
+  color: ${(props) => (props.$isLiked ? '#d25e5a' : '#787575')};
   @media screen and (max-width: 1279px) {
     font-size: 36px;
   }
@@ -202,9 +204,10 @@ const Image = styled.img`
 `;
 
 function Product() {
-  const [product, setProduct] = useState();
+  const { isLogin } = useContext(AuthContext);
   const { id } = useParams();
-  const [isLiked, setIsLiked] = useState(true);
+  const [product, setProduct] = useState();
+  const [isLiked, setIsLiked] = useState(false);
 
   const toggleLike = () => {
     setIsLiked(!isLiked);
@@ -218,6 +221,79 @@ function Product() {
     getProduct();
   }, [id]);
 
+  /*
+  初始載入
+    登入：
+      有在收藏清單：isLiked
+    登出：
+      有在localStorage：isLiked
+   */
+  useEffect(() => {
+    const checkIsCollected = async () => {
+      if (isLogin) {
+        const { data } = await ec2Api.getCollection();
+        const userCollections = data.products;
+        if (
+          userCollections.some((collection) => {
+            collection.id === id;
+          })
+        ) {
+          setIsLiked(true);
+        }
+      } else {
+        const localCollection = JSON.parse(localStorage.getItem('collection'));
+        if (
+          localCollection.some((collection) => {
+            collection.id === product.id;
+          })
+        ) {
+          setIsLiked(true);
+        }
+      }
+    };
+    checkIsCollected();
+  }, [id]);
+
+  /*
+  點擊收藏
+    登入：打api包含id&token
+    登出：更新localStorage
+  移除收藏
+    登入：打api包含id&token
+    登出：更新localStorage
+
+  */
+  // useEffect(() => {
+  //   const localCollection = JSON.parse(localStorage.getItem('collection'));
+  //   if (isLiked) {
+  //     if (isLogin) {
+  //       const checkIsCollected = async () => {
+  //         const isCollected = (await ec2Api.getCollection()).data.products.find((item) => {
+  //           return item.id === product.id;
+  //         });
+  //         if (!isCollected) {
+  //           ec2Api.addCollection(product.id);
+  //         }
+  //       };
+  //       checkIsCollected();
+  //     } else {
+  //       const isLocalCollected = localCollection.find((item) => {
+  //         return item === product.id;
+  //       });
+  //       if (!isLocalCollected) {
+  //         localStorage.setItem('collection', JSON.stringify([...localCollection, product.id]));
+  //       }
+  //     }
+  //   } else {
+  //     if (isLogin) {
+  //       ec2Api.deleteCollection(product.id);
+  //     } else {
+  //       const updatedList = localCollection.filter((item) => item !== product.id);
+  //       localStorage.setItem('collection', JSON.stringify(updatedList));
+  //     }
+  //   }
+  // }, [isLiked]);
+
   if (!product) return null;
 
   return (
@@ -228,7 +304,7 @@ function Product() {
         <ID>{product.id}</ID>
         <Price>
           TWD.{product.price}
-          <HeartIcon className='material-icons' onClick={toggleLike} isLiked={isLiked}>
+          <HeartIcon className='material-icons' onClick={toggleLike} $isLiked={isLiked}>
             {isLiked ? ' favorite' : 'favorite_border'}
           </HeartIcon>
         </Price>
