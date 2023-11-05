@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import api from '../utils/api';
 import fb from '../utils/fb';
 
@@ -17,10 +12,12 @@ export const AuthContext = createContext({
 });
 
 export const AuthContextProvider = ({ children }) => {
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
   const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
-  const [jwtToken, setJwtToken] = useState();
+  const [jwtToken, setJwtToken] = useState(
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2vySWQiOjI3LCJpYXQiOjE2OTkxNTU1MTgsImV4cCI6MTY5OTE1OTExOH0.vLglUw1UmHqbrjbzMx_5NcG_K-mY2cDDcdVyb17VEeY',
+  );
 
   const handleLoginResponse = useCallback(async (response) => {
     const accessToken = response.authResponse.accessToken;
@@ -47,7 +44,7 @@ export const AuthContextProvider = ({ children }) => {
         window.localStorage.removeItem('jwtToken');
         setLoading(false);
       }
-    }
+    };
     checkAuthStatus();
   }, [handleLoginResponse]);
 
@@ -63,7 +60,7 @@ export const AuthContextProvider = ({ children }) => {
       setLoading(false);
       return null;
     }
-  }
+  };
 
   const logout = async () => {
     setLoading(true);
@@ -73,7 +70,7 @@ export const AuthContextProvider = ({ children }) => {
     setJwtToken();
     window.localStorage.removeItem('jwtToken');
     setLoading(false);
-  }
+  };
 
   return (
     <AuthContext.Provider
@@ -89,4 +86,4 @@ export const AuthContextProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-}
+};
