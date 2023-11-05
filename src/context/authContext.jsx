@@ -14,10 +14,12 @@ export const AuthContext = createContext({
 });
 
 export const AuthContextProvider = ({ children }) => {
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
   const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
-  const [jwtToken, setJwtToken] = useState();
+  const [jwtToken, setJwtToken] = useState(
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2vySWQiOjI3LCJpYXQiOjE2OTkxNTU1MTgsImV4cCI6MTY5OTE1OTExOH0.vLglUw1UmHqbrjbzMx_5NcG_K-mY2cDDcdVyb17VEeY',
+  );
 
   const handleLoginResponse = useCallback(async (response) => {
     const accessToken = response.authResponse.accessToken;
@@ -95,6 +97,7 @@ export const AuthContextProvider = ({ children }) => {
     } catch (error) {
       console.error(error);
     }
+
   };
 
   return (
