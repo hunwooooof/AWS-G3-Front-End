@@ -1,42 +1,7 @@
 const ec2Api = {
-  hostname: 'http://35.72.177.254:3000/api/',
-  async getProducts(category, paging) {
-    const response = await fetch(
-      `${this.hostname}/products/${category}?paging=${paging}`,
-    );
-    return await response.json();
-  },
-  async getCampaigns() {
-    const response = await fetch(`${this.hostname}/marketing/campaigns`);
-    return await response.json();
-  },
-  async searchProducts(keyword, paging) {
-    const response = await fetch(
-      `${this.hostname}/products/search?keyword=${keyword}&paging=${paging}`,
-    );
-    return await response.json();
-  },
-  async getProduct(id) {
-    const response = await fetch(`${this.hostname}/products/details?id=${id}`);
-    console.log(response);
-    const aa = await response.json();
-    console.log(aa);
-
-    return await response.json();
-  },
-  async checkout(data, jwtToken) {
-    const response = await fetch(`${this.hostname}/order/checkout`, {
-      body: JSON.stringify(data),
-      headers: new Headers({
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${jwtToken}`,
-      }),
-      method: 'POST',
-    });
-    return await response.json();
-  },
+  hostname: 'http://35.72.177.254:3000',
   async signin(data) {
-    const response = await fetch(`${this.hostname}/user/signin`, {
+    const response = await fetch(`${this.hostname}/api/user/signin`, {
       body: JSON.stringify(data),
       headers: new Headers({
         'Content-Type': 'application/json',
@@ -45,17 +10,28 @@ const ec2Api = {
     });
     return await response.json();
   },
-  async getProfile(jwtToken) {
-    const response = await fetch(`${this.hostname}/user/profile`, {
+  async getAllCoupons() {
+    const response = await fetch(`${this.hostname}/api/marketing/coupons`);
+    return await response.json();
+  },
+  async postClaimCoupon(jwtToken) {
+    const response = await fetch(`${this.hostname}/api/v1/coupons`, {
+
+      body: JSON.stringify(data),
       headers: new Headers({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwtToken}`,
       }),
+      method: 'POST',
     });
+    return await response.json();
+  },
+    async getUserCoupons() {
+    const response = await fetch(`${this.hostname}/api/v1/coupons`);
     return await response.json();
   },
   async getCollection(jwtToken) {
-    const response = await fetch(`${this.hostname}/v1/collection`, {
+    const response = await fetch(`${this.hostname}/api/v1/collection`, {
       headers: new Headers({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwtToken}`,
@@ -64,7 +40,7 @@ const ec2Api = {
     return await response.json();
   },
   async addCollection(id, jwtToken) {
-    const response = await fetch(`${this.hostname}/v1/collection`, {
+    const response = await fetch(`${this.hostname}/api/v1/collection`, {
       headers: new Headers({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwtToken}`,
@@ -74,17 +50,19 @@ const ec2Api = {
     });
     return await response.json();
   },
-
   async deleteCollection(id, jwtToken) {
-    const response = await fetch(`${this.hostname}/v1/collection`, {
+    const response = await fetch(`${this.hostname}/api/v1/collection`, {
       headers: new Headers({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwtToken}`,
       }),
       body: JSON.stringify({ productId: id, method: 'delete' }),
-      method: 'POST',
+         method: 'POST',
     });
     return await response.json();
   },
+
+
 };
+
 export default ec2Api;
