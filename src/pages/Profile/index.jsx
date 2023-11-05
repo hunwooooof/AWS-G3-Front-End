@@ -2,6 +2,8 @@ import { useContext } from 'react';
 import ReactLoading from 'react-loading';
 import styled from 'styled-components';
 import { AuthContext } from '../../context/authContext';
+import facebookImgUrl from './FacebookLogo.png';
+import sImgUrl from './s-logo.png';
 
 const Wrapper = styled.div`
   padding: 60px 20px;
@@ -30,6 +32,23 @@ const LogoutButton = styled.button`
   margin-top: 24px;
 `;
 
+const Text = styled.div`
+  letter-spacing: 2px;
+  font-size: 20px;
+  color: #3f3a3aa6;
+  margin: 50px 0;
+`;
+
+const LogIn = styled.div`
+  display: flex;
+  gap: 50px;
+  justify-content: center;
+`;
+
+const Btn = styled.a`
+  cursor: pointer;
+`;
+
 const Loading = styled(ReactLoading)`
   margin-top: 50px;
 `;
@@ -38,23 +57,30 @@ function Profile() {
   const { user, isLogin, login, logout, loading } = useContext(AuthContext);
 
   const renderContent = () => {
-    if (loading) return <Loading type="spinningBubbles" color="#313538" />;
-    if (isLogin) return (
+    if (loading) return <Loading type='spinningBubbles' color='#313538' />;
+    if (isLogin)
+      return (
+        <>
+          <Photo src={user.picture} />
+          <Content>{user.name}</Content>
+          <Content>{user.email}</Content>
+          <LogoutButton onClick={logout}>登出</LogoutButton>
+        </>
+      );
+    return (
       <>
-        <Photo src={user.picture} />
-        <Content>{user.name}</Content>
-        <Content>{user.email}</Content>
-        <LogoutButton
-          onClick={logout}
-        >
-          登出
-        </LogoutButton>
+        <Text>選擇登入方式</Text>
+        <LogIn>
+          <Btn onClick={login}>
+            <img src={facebookImgUrl} width={50} alt='facebook-logo' />
+          </Btn>
+          <Btn>
+            <img src={sImgUrl} width={50} alt='stylish-s-logo' />
+          </Btn>
+        </LogIn>
       </>
     );
-    return (
-      <LogoutButton onClick={login}>登入</LogoutButton>
-    );
-  }
+  };
   return (
     <Wrapper>
       <Title>會員基本資訊</Title>
