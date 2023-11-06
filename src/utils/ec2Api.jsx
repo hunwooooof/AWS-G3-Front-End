@@ -38,10 +38,10 @@ const ec2Api = {
     const response = await fetch(`${this.hostname}/api/v1/coupons`);
     return await response.json();
   },
-  async postClaimCoupon(data, jwtToken) {
+  async postClaimCoupon(id, jwtToken) {
     const response = await fetch(`${this.hostname}/api/v1/coupons`, {
-      body: JSON.stringify({ id: data }),
 
+      body: JSON.stringify({ id: id }),
       headers: new Headers({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwtToken}`,
