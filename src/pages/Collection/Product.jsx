@@ -75,7 +75,7 @@ const Product = ({ productInfo }) => {
     if (isLiked) {
       if (isLogin) {
         const checkIsCollected = async () => {
-          const isCollected = (await ec2Api.getCollection()).data.products.find(
+          const isCollected = (await ec2Api.getCollection()).data.find(
             (item) => {
               return item.id === productInfo.id;
             },
@@ -87,12 +87,12 @@ const Product = ({ productInfo }) => {
         checkIsCollected();
       } else {
         const isLocalCollected = localCollection.find((item) => {
-          return item === productInfo.id;
+          return item.id === productInfo.id;
         });
         if (!isLocalCollected) {
           localStorage.setItem(
             'collection',
-            JSON.stringify([...localCollection, productInfo.id]),
+            JSON.stringify([...localCollection, productInfo]),
           );
         }
       }
@@ -101,7 +101,7 @@ const Product = ({ productInfo }) => {
         ec2Api.deleteCollection(productInfo.id);
       } else {
         const updatedList = localCollection.filter(
-          (item) => item !== productInfo.id,
+          (item) => item.id !== productInfo.id,
         );
         localStorage.setItem('collection', JSON.stringify(updatedList));
       }
@@ -110,7 +110,7 @@ const Product = ({ productInfo }) => {
 
   return (
     <Wrapper to="/product">
-      <Image src={productInfo.image} />
+      <Image src={productInfo.main_image} />
       <Details>
         <Title>{productInfo.title}</Title>
         {/* <Price>{productInfo.price}</Price> */}

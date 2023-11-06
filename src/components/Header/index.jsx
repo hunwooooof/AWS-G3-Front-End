@@ -298,12 +298,17 @@ function Header() {
     if (category) setInputValue('');
   }, [category]);
 
-  const handleProfileMenuShow = () => {
-    isProfileMenuShow ? setIsProfileMenuShow(false) : setIsProfileMenuShow(true);
+  const handleProfileMenuShow = (e) => {
+    e.stopPropagation();
+    setIsProfileMenuShow(!isProfileMenuShow);
+  };
+
+  const handleProfileMenuNotShow = () => {
+    setIsProfileMenuShow(false);
   };
 
   return (
-    <Wrapper onClick={handleProfileMenuShow}>
+    <Wrapper onClick={handleProfileMenuNotShow}>
       <Logo to='/' />
       <CategoryLinks>
         {categories.map(({ name, displayText }, index) => (

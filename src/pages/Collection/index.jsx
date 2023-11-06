@@ -18,7 +18,7 @@ const Wrap = styled.div`
   }
 `;
 const Collection = () => {
-  const { isLogin } = useContext(AuthContext);
+  const { isLogin, jwtToken } = useContext(AuthContext);
   const [collection, setCollection] = useState([]);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ const Collection = () => {
     async function getCollection() {
       const localCollection = JSON.parse(localStorage.getItem('collection'));
       if (isLogin) {
-        const userCollection = (await ec2Api.getCollection()).data.products;
+        const userCollection = (await ec2Api.getCollection(jwtToken)).data;
         const userCollectionId = userCollection.map((product) => product.id);
         const toBeSavedCollection = localCollection.filter(
           (id) => !userCollectionId.includes(id),
@@ -47,7 +47,8 @@ const Collection = () => {
           }
         }
 
-        const newUserCollection = (await ec2Api.getCollection()).data.products;
+        const newUserCollection = (await ec2Api.getCollection(jwtToken)).data;
+        console.log(newUserCollection);
         setCollection(newUserCollection);
       } else {
         console.log('no user');
@@ -64,6 +65,7 @@ const Collection = () => {
         collection.map((productInfo, index) => {
           return <Product productInfo={productInfo} key={index} />;
         })}
+      {!collection && <>你沒有收藏的商品！</>}
     </Wrap>
   );
 };
