@@ -1,5 +1,5 @@
 const ec2Api = {
-  hostname: 'http://35.72.177.254:3000',
+  hostname: 'https://ygolonhcet.online',
   async signin(data) {
     const response = await fetch(`${this.hostname}/api/user/signin`, {
       body: JSON.stringify(data),
@@ -10,13 +10,24 @@ const ec2Api = {
     });
     return await response.json();
   },
+  async getProducts(category, paging) {
+    const response = await fetch(
+      `${this.hostname}/api/products/${category}?paging=${paging}`,
+    );
+    return await response.json();
+  },
+  async getProduct(id) {
+    const response = await fetch(
+      `${this.hostname}/api/products/details?id=${id}`,
+    );
+    return await response.json();
+  },
   async getAllCoupons() {
     const response = await fetch(`${this.hostname}/api/marketing/coupons`);
     return await response.json();
   },
   async postClaimCoupon(jwtToken) {
     const response = await fetch(`${this.hostname}/api/v1/coupons`, {
-
       body: JSON.stringify(data),
       headers: new Headers({
         'Content-Type': 'application/json',
@@ -26,17 +37,20 @@ const ec2Api = {
     });
     return await response.json();
   },
-    async getUserCoupons() {
+  async getUserCoupons() {
     const response = await fetch(`${this.hostname}/api/v1/coupons`);
     return await response.json();
   },
-  async getCollection(jwtToken) {
-    const response = await fetch(`${this.hostname}/api/v1/collection`, {
-      headers: new Headers({
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${jwtToken}`,
-      }),
-    });
+  async getCollection(jwtToken, paging = 0) {
+    const response = await fetch(
+      `${this.hostname}/api/v1/collection?paging=${paging}`,
+      {
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwtToken}`,
+        }),
+      },
+    );
     return await response.json();
   },
   async addCollection(id, jwtToken) {
@@ -57,12 +71,10 @@ const ec2Api = {
         Authorization: `Bearer ${jwtToken}`,
       }),
       body: JSON.stringify({ productId: id, method: 'delete' }),
-         method: 'POST',
+      method: 'POST',
     });
     return await response.json();
   },
-
-
 };
 
 export default ec2Api;

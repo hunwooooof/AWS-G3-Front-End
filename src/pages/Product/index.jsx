@@ -1,7 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import api from '../../utils/api';
 import ec2Api from '../../utils/ec2Api';
 import ProductVariants from './ProductVariants';
 import { AuthContext } from '../../context/authContext';
@@ -204,7 +203,7 @@ const Image = styled.img`
 `;
 
 function Product() {
-  const { isLogin, jwtToken } = useContext(AuthContext);
+  const { isLogin, jwtToken, user } = useContext(AuthContext);
   const { id } = useParams();
   const [product, setProduct] = useState();
   const [isLiked, setIsLiked] = useState(false);
@@ -214,82 +213,169 @@ function Product() {
   };
 
   useEffect(() => {
+    const localCollection = JSON.parse(localStorage.getItem('collection'));
+    if (localCollection === null || localCollection.length === 0) {
+      localStorage.setItem('collection', JSON.stringify([]));
+    }
+  }, []);
+
+  useEffect(() => {
     async function getProduct() {
-      const { data } = await api.getProduct(id);
+      const { data } = await ec2Api.getProduct(id);
       setProduct(data);
     }
     getProduct();
   }, [id]);
 
   useEffect(() => {
-    const getInitialCollectStatus = async () => {
-      if (isLogin) {
-        const { data } = await ec2Api.getCollection();
-        const userCollections = data.products;
-        if (
-          userCollections.some((collection) => {
-            collection.id === id;
-          })
-        ) {
-          setIsLiked(true);
+    if (product) {
+      const getInitialCollectStatus = async () => {
+        if (isLogin) {
+          const allUserCollections = [];
+          let currentPage = 0;
+          async function fetchSinglePageCollections() {
+            try {
+              const response = await ec2Api.getCollection(
+                jwtToken,
+                currentPage,
+              );
+              if (response) {
+                allUserCollections.push(...response.data);
+              }
+              if (
+                response.next_paging > 0 &&
+                response.next_paging !== currentPage
+              ) {
+                currentPage = response.next_paging;
+                await fetchSinglePageCollections();
+              }
+            } catch (error) {
+              console.error('Fetch error:', error);
+            }
+          }
+          await fetchSinglePageCollections();
+
+          if (
+            allUserCollections.some((collection) => {
+              return collection.id === product.id;
+            })
+          ) {
+            setIsLiked(true);
+          }
+
+          const localCollection = JSON.parse(
+            localStorage.getItem('collection'),
+          );
+          const userCollectionsId = allUserCollections.map(
+            (product) => product.id,
+          );
+
+          let toBeSavedCollections = [];
+          localCollection.forEach((product) => {
+            if (!userCollectionsId.includes(product.id)) {
+              toBeSavedCollections.push(product);
+            }
+          });
+
+          if (toBeSavedCollections.length > 0) {
+            for (const product of toBeSavedCollections) {
+              await ec2Api.addCollection(product.id, jwtToken);
+            }
+          }
+          localStorage.setItem('collection', JSON.stringify([]));
+        } else {
+          const localCollection = JSON.parse(
+            localStorage.getItem('collection'),
+          );
+          if (
+            localCollection.some((collection) => {
+              return collection.id === product.id;
+            })
+          ) {
+            setIsLiked(true);
+          }
         }
-      } else {
+      };
+      getInitialCollectStatus();
+    }
+  }, [product]);
+
+  useEffect(() => {
+    const changeCollection = async function () {
+      if (product) {
         const localCollection = JSON.parse(localStorage.getItem('collection'));
-        if (
-          localCollection.some((collection) => {
-            collection.id === product.id;
-          })
-        ) {
-          setIsLiked(true);
+        const updatedList = localCollection.filter(
+          (item) => item.id !== product.id,
+        );
+        if (isLiked) {
+          if (isLogin) {
+            const response = await ec2Api.addCollection(product.id, jwtToken);
+            console.log(response.message);
+          } else {
+            const isLocalCollected = localCollection.find((item) => {
+              return item.id === product.id;
+            });
+            if (!isLocalCollected) {
+              const updatedCollection = [...localCollection, product];
+              localStorage.setItem(
+                'collection',
+                JSON.stringify(updatedCollection),
+              );
+            }
+          }
+        } else {
+          if (isLogin) {
+            const response = await ec2Api.deleteCollection(
+              product.id,
+              jwtToken,
+            );
+            console.log(response.message);
+          } else {
+            localStorage.setItem('collection', JSON.stringify(updatedList));
+          }
         }
       }
     };
-    getInitialCollectStatus();
-  }, [id]);
-
-  useEffect(() => {
-    const localCollection = JSON.parse(localStorage.getItem('collection'));
-    const updatedList = localCollection.filter((item) => item !== product.id);
-    isLiked
-      ? isLogin
-        ? ec2Api.addCollection(product.id, jwtToken)
-        : localStorage.setItem('collection', JSON.stringify([...localCollection, product.id]))
-      : isLogin
-      ? ec2Api.deleteCollection(product.id, jwtToken)
-      : localStorage.setItem('collection', JSON.stringify(updatedList));
-  }, [product, isLiked]);
+    changeCollection();
+  }, [isLiked]);
 
   if (!product) return null;
 
   return (
-    <Wrapper>
-      <MainImage src={product.main_image} />
-      <Details>
-        <Title>{product.title}</Title>
-        <ID>{product.id}</ID>
-        <Price>
-          TWD.{product.price}
-          <HeartIcon className='material-icons' onClick={toggleLike} $isLiked={isLiked}>
-            {isLiked ? ' favorite' : 'favorite_border'}
-          </HeartIcon>
-        </Price>
-        <ProductVariants product={product} />
-        <Note>{product.note}</Note>
-        <Texture>{product.texture}</Texture>
-        <Description>{product.description}</Description>
-        <Place>素材產地 / {product.place}</Place>
-        <Place>加工產地 / {product.place}</Place>
-      </Details>
-      <Story>
-        <StoryTitle>細部說明</StoryTitle>
-        <StoryContent>{product.story}</StoryContent>
-      </Story>
-      <Images>
-        {product.images.map((image, index) => (
-          <Image src={image} key={index} />
-        ))}
-      </Images>
-    </Wrapper>
+    product && (
+      <Wrapper>
+        <MainImage src={product.main_image} />
+        <Details>
+          <Title>{product.title}</Title>
+          <ID>{product.id}</ID>
+          <Price>
+            TWD.{product.price}
+            <HeartIcon
+              className="material-icons"
+              onClick={toggleLike}
+              $isLiked={isLiked}
+            >
+              {isLiked ? ' favorite' : 'favorite_border'}
+            </HeartIcon>
+          </Price>
+          <ProductVariants product={product} />
+          <Note>{product.note}</Note>
+          <Texture>{product.texture}</Texture>
+          <Description>{product.description}</Description>
+          <Place>素材產地 / {product.place}</Place>
+          <Place>加工產地 / {product.place}</Place>
+        </Details>
+        <Story>
+          <StoryTitle>細部說明</StoryTitle>
+          <StoryContent>{product.story}</StoryContent>
+        </Story>
+        <Images>
+          {product.images.map((image, index) => (
+            <Image src={image} key={index} />
+          ))}
+        </Images>
+      </Wrapper>
+    )
   );
 }
 
