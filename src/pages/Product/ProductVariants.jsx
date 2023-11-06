@@ -21,7 +21,7 @@ const OptionName = styled.div`
     font-size: 14px;
     letter-spacing: 2.8px;
 
-    ${(props) => props.$hideOnMobile && 'display: none;'}
+    ${(props) => props.hideOnMobile && 'display: none;'}
   }
 `;
 
@@ -126,8 +126,17 @@ function ProductVariants({ product }) {
   function getStock(colorCode, size) {
     if (!colorCode || !size) return 0;
     const qty =
-      cartItems.find((item) => item.id === product.id && item.color.code === colorCode && item.size === size)?.qty || 0;
-    return product.variants.find((variant) => variant.color_code === colorCode && variant.size === size).stock - qty;
+      cartItems.find(
+        (item) =>
+          item.id === product.id &&
+          item.color.code === colorCode &&
+          item.size === size
+      )?.qty || 0;
+    return (
+      product.variants.find(
+        (variant) => variant.color_code === colorCode && variant.size === size
+      ).stock - qty
+    );
   }
 
   function addToCart() {
@@ -145,7 +154,10 @@ function ProductVariants({ product }) {
     }
 
     const index = cartItems.findIndex(
-      (item) => item.id === product.id && item.color.code === selectedColorCode && item.size === selectedSize,
+      (item) =>
+        item.id === product.id &&
+        item.color.code === selectedColorCode &&
+        item.size === selectedSize
     );
     const newCartItems =
       index !== -1
@@ -161,7 +173,9 @@ function ProductVariants({ product }) {
         : [
             ...cartItems,
             {
-              color: product.colors.find((color) => color.code === selectedColorCode),
+              color: product.colors.find(
+                (color) => color.code === selectedColorCode
+              ),
               id: product.id,
               image: product.main_image,
               name: product.title,
@@ -215,14 +229,15 @@ function ProductVariants({ product }) {
                 if (stock === 0) return;
                 setSelectedSize(size);
                 setQuantity(0);
-              }}>
+              }}
+            >
               {size}
             </Size>
           );
         })}
       </Option>
       <Option>
-        <OptionName $hideOnMobile>數量｜</OptionName>
+        <OptionName hideOnMobile>數量｜</OptionName>
         <QuantitySelector>
           <DecrementButton
             onClick={() => {

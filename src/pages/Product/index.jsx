@@ -1,10 +1,8 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import api from '../../utils/api';
-import ec2Api from '../../utils/ec2Api';
 import ProductVariants from './ProductVariants';
-import { AuthContext } from '../../context/authContext';
 
 const Wrapper = styled.div`
   max-width: 960px;
@@ -64,8 +62,6 @@ const ID = styled.div`
 `;
 
 const Price = styled.div`
-  display: flex;
-  justify-content: space-between;
   line-height: 36px;
   margin-top: 40px;
   font-size: 30px;
@@ -78,16 +74,6 @@ const Price = styled.div`
     margin-top: 20px;
     font-size: 20px;
     padding-bottom: 10px;
-  }
-`;
-
-const HeartIcon = styled.span`
-  font-family: 'Material Icons';
-  font-size: 40px;
-  cursor: pointer;
-  color: ${(props) => (props.$isLiked ? '#d25e5a' : '#787575')};
-  @media screen and (max-width: 1279px) {
-    font-size: 36px;
   }
 `;
 
@@ -204,14 +190,8 @@ const Image = styled.img`
 `;
 
 function Product() {
-  const { isLogin, jwtToken } = useContext(AuthContext);
-  const { id } = useParams();
   const [product, setProduct] = useState();
-  const [isLiked, setIsLiked] = useState(false);
-
-  const toggleLike = () => {
-    setIsLiked(!isLiked);
-  };
+  const { id } = useParams();
 
   useEffect(() => {
     async function getProduct() {
@@ -221,44 +201,6 @@ function Product() {
     getProduct();
   }, [id]);
 
-  useEffect(() => {
-    const getInitialCollectStatus = async () => {
-      if (isLogin) {
-        const { data } = await ec2Api.getCollection();
-        const userCollections = data.products;
-        if (
-          userCollections.some((collection) => {
-            collection.id === id;
-          })
-        ) {
-          setIsLiked(true);
-        }
-      } else {
-        const localCollection = JSON.parse(localStorage.getItem('collection'));
-        if (
-          localCollection.some((collection) => {
-            collection.id === product.id;
-          })
-        ) {
-          setIsLiked(true);
-        }
-      }
-    };
-    getInitialCollectStatus();
-  }, [id]);
-
-  useEffect(() => {
-    const localCollection = JSON.parse(localStorage.getItem('collection'));
-    const updatedList = localCollection.filter((item) => item !== product.id);
-    isLiked
-      ? isLogin
-        ? ec2Api.addCollection(product.id, jwtToken)
-        : localStorage.setItem('collection', JSON.stringify([...localCollection, product.id]))
-      : isLogin
-      ? ec2Api.deleteCollection(product.id, jwtToken)
-      : localStorage.setItem('collection', JSON.stringify(updatedList));
-  }, [product, isLiked]);
-
   if (!product) return null;
 
   return (
@@ -267,12 +209,7 @@ function Product() {
       <Details>
         <Title>{product.title}</Title>
         <ID>{product.id}</ID>
-        <Price>
-          TWD.{product.price}
-          <HeartIcon className='material-icons' onClick={toggleLike} $isLiked={isLiked}>
-            {isLiked ? ' favorite' : 'favorite_border'}
-          </HeartIcon>
-        </Price>
+        <Price>TWD.{product.price}</Price>
         <ProductVariants product={product} />
         <Note>{product.note}</Note>
         <Texture>{product.texture}</Texture>
