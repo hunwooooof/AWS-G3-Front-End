@@ -11,13 +11,14 @@ const ec2Api = {
     return await response.json();
   },
   async getAllCoupons() {
-    const response = await fetch(`${this.hostname}/api/marketing/coupons`);
+    const response = await fetch(`${this.hostname}/api/v1/coupons`);
     return await response.json();
   },
-  async postClaimCoupon(jwtToken) {
+  async postClaimCoupon(data, jwtToken) {
     const response = await fetch(`${this.hostname}/api/v1/coupons`, {
-
-      body: JSON.stringify(data),
+      body: {
+        couponId: data,
+      },
       headers: new Headers({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwtToken}`,
@@ -26,8 +27,22 @@ const ec2Api = {
     });
     return await response.json();
   },
-    async getUserCoupons() {
-    const response = await fetch(`${this.hostname}/api/v1/coupons`);
+  async getUserValidCoupons(jwtToken) {
+    const response = await fetch(`${this.hostname}/api/v1/valid-coupons`, {
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
+    });
+    return await response.json();
+  },
+  async getUserInvalidCoupons(jwtToken) {
+    const response = await fetch(`${this.hostname}/api/v1/valid-coupons`, {
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
+    });
     return await response.json();
   },
   async getCollection(jwtToken) {
@@ -57,12 +72,10 @@ const ec2Api = {
         Authorization: `Bearer ${jwtToken}`,
       }),
       body: JSON.stringify({ productId: id, method: 'delete' }),
-         method: 'POST',
+      method: 'POST',
     });
     return await response.json();
   },
-
-
 };
 
 export default ec2Api;

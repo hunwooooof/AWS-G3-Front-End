@@ -99,7 +99,7 @@ function Profile() {
     if (isLogin)
       return (
         <>
-          <Photo src={user.picture} />
+          <Photo src={user.picture || sImgUrl} />
           <Content>{user.name}</Content>
           <Content>{user.email}</Content>
           <LogoutButton onClick={logout}>登出</LogoutButton>
