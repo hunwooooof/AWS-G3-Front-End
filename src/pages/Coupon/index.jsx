@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import ReactLoading from 'react-loading';
+import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import api from '../../utils/api';
 import discountImage from './discount.webp';
 import freeFreightImage from './free-freight-fee.webp';
+import disabledDiscountImage from './discount-disabled.webp';
+import disabledFreeFreightImage from './free-freight-fee-disabled.webp';
 import ec2Api from '../../utils/ec2Api';
+import { AuthContext } from '../../context/authContext';
 
 const Wrapper = styled.div`
   max-width: 960px;
@@ -172,45 +172,56 @@ const Loading = styled(warning)`
 `;
 
 function Coupon() {
+  const { isLogin, jwtToken } = useContext(AuthContext);
   const [couponsTag, setCouponsTag] = useState('All');
   const [allCoupons, setAllCoupons] = useState(null);
-  const [userCoupons, setUserCoupons] = useState(null);
+  const [userValidCoupons, setUserValidCoupons] = useState(null);
+  const [userInvalidCoupons, setUserInvalidCoupons] = useState(null);
   const coupons =
-    couponsTag === 'All'
-      ? allCoupons
-      : couponsTag === 'UserCoupons'
-      ? userCoupons.filter((coupon) => !coupon.isUsed)
-      : userCoupons.filter((coupon) => coupon.isUsed);
+    couponsTag === 'All' ? allCoupons : couponsTag === 'UserCoupons' ? userValidCoupons : userInvalidCoupons;
 
   useEffect(() => {
     async function getAllCoupons() {
       const { data } = await ec2Api.getAllCoupons();
       setAllCoupons(data);
-      console.log(data);
+      console.log('所有優惠券', data);
     }
     getAllCoupons();
-  }, []);
+  }, [couponsTag]);
 
   useEffect(() => {
-    async function getUserCoupons() {
-      const { data } = await ec2Api.getUserCoupons();
-      setUserCoupons(data);
-      console.log(data);
+    async function getUserValidCoupons() {
+      const { data } = await ec2Api.getUserValidCoupons(jwtToken);
+      setUserValidCoupons(data);
+      console.log('使用者可用優惠券', data);
     }
-    getUserCoupons();
-  }, []);
+    if (isLogin) getUserValidCoupons();
+  }, [couponsTag]);
+
+  useEffect(() => {
+    async function getUserInvalidCoupons() {
+      const { data } = await ec2Api.getUserInvalidCoupons(jwtToken);
+      setUserInvalidCoupons(data);
+      console.log('使用者已失效優惠券', data);
+    }
+    if (isLogin) getUserInvalidCoupons();
+  }, [couponsTag]);
 
   const handleCouponTag = (e) => {
-    setCouponsTag(e.target.id);
+    e.target.id !== 'All'
+      ? isLogin
+        ? setCouponsTag(e.target.id)
+        : alert('請先登入再查看優惠券！')
+      : setCouponsTag(e.target.id);
   };
 
-  // const handleClaimCoupon = (jwtToken) => {
-  //   async function postClaimCoupon() {
-  //     const { data } = await ec2Api.postClaimCoupon(jwtToken);
-  //     console.log(data);
-  //   }
-  //   postClaimCoupon();
-  // };
+  const handleClaimCoupon = (e) => {
+    async function postClaimCoupon() {
+      const { data } = await ec2Api.postClaimCoupon(e.target.id, jwtToken);
+      console.log(data);
+    }
+    isLogin ? postClaimCoupon() : alert('請先登入');
+  };
 
   return (
     <Wrapper>
@@ -228,28 +239,59 @@ function Coupon() {
       </SubTitle>
       <Section>
         {coupons ? (
-          coupons.length > 0 && userCoupons ? (
-            coupons.map((coupon) => {
-              const couponImg = coupon.couponType === '折扣' ? discountImage : freeFreightImage;
-              return (
-                <Item key={coupon.couponId}>
-                  <Img src={couponImg} alt='coupon.couponTitle' />
-                  <ItemDetail>
-                    <ItemInfo>
-                      <ItemInfoName>{coupon.couponTitle}</ItemInfoName>
-                      {couponsTag === 'All' ? (
-                        userCoupons.some((userCoupon) => userCoupon.couponId === coupon.couponId) ? (
-                          <GetButton disabled>已領取</GetButton>
-                        ) : (
-                          <GetButton>領取</GetButton>
-                        )
-                      ) : null}
-                    </ItemInfo>
-                    <ExpireDate>有效期限：{coupon.couponExpiredDate}</ExpireDate>
-                  </ItemDetail>
-                </Item>
-              );
-            })
+          coupons.length > 0 ? (
+            userValidCoupons ? (
+              coupons.map((coupon) => {
+                const couponImg =
+                  coupon.type === '折扣'
+                    ? couponsTag === 'CouponHistory'
+                      ? disabledDiscountImage
+                      : discountImage
+                    : couponsTag === 'CouponHistory'
+                    ? disabledFreeFreightImage
+                    : freeFreightImage;
+                const expiredDate = coupon.expiredDate.slice(0, 10);
+                return (
+                  <Item key={coupon.id}>
+                    <Img src={couponImg} alt='coupon.couponTitle' />
+                    <ItemDetail>
+                      <ItemInfo>
+                        <ItemInfoName>{coupon.title}</ItemInfoName>
+                        {couponsTag === 'All' ? (
+                          userValidCoupons.some((userCoupon) => userCoupon.id === coupon.id) ? (
+                            <GetButton disabled>已領取</GetButton>
+                          ) : (
+                            <GetButton onClick={handleClaimCoupon} id={coupon.id}>
+                              領取
+                            </GetButton>
+                          )
+                        ) : null}
+                      </ItemInfo>
+                      <ExpireDate>有效期限：{expiredDate}</ExpireDate>
+                    </ItemDetail>
+                  </Item>
+                );
+              })
+            ) : (
+              coupons.map((coupon) => {
+                const couponImg = coupon.type === '折扣' ? discountImage : freeFreightImage;
+                const expiredDate = coupon.expiredDate.slice(0, 10);
+                return (
+                  <Item key={coupon.id}>
+                    <Img src={couponImg} alt='coupon.couponTitle' />
+                    <ItemDetail>
+                      <ItemInfo>
+                        <ItemInfoName>{coupon.title}</ItemInfoName>
+                        <GetButton onClick={handleClaimCoupon} id={coupon.id}>
+                          領取
+                        </GetButton>
+                      </ItemInfo>
+                      <ExpireDate>有效期限：{expiredDate}</ExpireDate>
+                    </ItemDetail>
+                  </Item>
+                );
+              })
+            )
           ) : (
             <NoCoupon>目前沒有優惠券唷！</NoCoupon>
           )

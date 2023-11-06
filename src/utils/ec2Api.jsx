@@ -10,6 +10,7 @@ const ec2Api = {
     });
     return await response.json();
   },
+
   async getProducts(category, paging) {
     const response = await fetch(
       `${this.hostname}/api/products/${category}?paging=${paging}`,
@@ -22,13 +23,25 @@ const ec2Api = {
     );
     return await response.json();
   },
-  async getAllCoupons() {
-    const response = await fetch(`${this.hostname}/api/marketing/coupons`);
+
+  async getProfile(jwtToken) {
+    const response = await fetch(`${this.hostname}/api/user/profile`, {
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
+    });
     return await response.json();
   },
-  async postClaimCoupon(jwtToken) {
+
+  async getAllCoupons() {
+    const response = await fetch(`${this.hostname}/api/v1/coupons`);
+    return await response.json();
+  },
+  async postClaimCoupon(data, jwtToken) {
     const response = await fetch(`${this.hostname}/api/v1/coupons`, {
-      body: JSON.stringify(data),
+      body: JSON.stringify({ id: data }),
+
       headers: new Headers({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwtToken}`,
@@ -37,10 +50,26 @@ const ec2Api = {
     });
     return await response.json();
   },
-  async getUserCoupons() {
-    const response = await fetch(`${this.hostname}/api/v1/coupons`);
+
+  async getUserValidCoupons(jwtToken) {
+    const response = await fetch(`${this.hostname}/api/v1/valid-coupons`, {
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
+    });
     return await response.json();
   },
+  async getUserInvalidCoupons(jwtToken) {
+    const response = await fetch(`${this.hostname}/api/v1/valid-coupons`, {
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
+    });
+    return await response.json();
+  },
+
   async getCollection(jwtToken, paging = 0) {
     const response = await fetch(
       `${this.hostname}/api/v1/collection?paging=${paging}`,
