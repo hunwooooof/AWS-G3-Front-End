@@ -14,12 +14,10 @@ export const AuthContext = createContext({
 });
 
 export const AuthContextProvider = ({ children }) => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
-  const [jwtToken, setJwtToken] = useState(
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2vySWQiOjI3LCJpYXQiOjE2OTkxNTU1MTgsImV4cCI6MTY5OTE1OTExOH0.vLglUw1UmHqbrjbzMx_5NcG_K-mY2cDDcdVyb17VEeY',
-  );
+  const [jwtToken, setJwtToken] = useState();
 
   const handleLoginResponse = useCallback(async (response) => {
     const accessToken = response.authResponse.accessToken;
@@ -68,13 +66,14 @@ export const AuthContextProvider = ({ children }) => {
   const nativeLogin = async (body) => {
     setLoading(true);
     const { data } = await ec2Api.signin(body);
-    console.log(data);
     if (data) {
-      const { user } = data;
       const accessToken = data.access_token;
-      setUser(user);
-      setJwtToken(accessToken);
-      window.localStorage.setItem('jwtToken', accessToken);
+      const userData = await ec2Api.getProfile(accessToken);
+      if (userData) {
+        setUser(userData.data);
+        setJwtToken(accessToken);
+        window.localStorage.setItem('jwtToken', accessToken);
+      }
       setLoading(false);
       setIsLogin(true);
       return accessToken;
@@ -97,7 +96,6 @@ export const AuthContextProvider = ({ children }) => {
     } catch (error) {
       console.error(error);
     }
-
   };
 
   return (
