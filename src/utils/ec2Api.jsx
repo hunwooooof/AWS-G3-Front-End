@@ -10,13 +10,21 @@ const ec2Api = {
     });
     return await response.json();
   },
+  async getProfile(jwtToken) {
+    const response = await fetch(`${this.hostname}/api/user/profile`, {
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
+    });
+    return await response.json();
+  },
   async getAllCoupons() {
     const response = await fetch(`${this.hostname}/api/marketing/coupons`);
     return await response.json();
   },
   async postClaimCoupon(jwtToken) {
     const response = await fetch(`${this.hostname}/api/v1/coupons`, {
-
       body: JSON.stringify(data),
       headers: new Headers({
         'Content-Type': 'application/json',
@@ -26,7 +34,7 @@ const ec2Api = {
     });
     return await response.json();
   },
-    async getUserCoupons() {
+  async getUserCoupons() {
     const response = await fetch(`${this.hostname}/api/v1/coupons`);
     return await response.json();
   },
@@ -57,12 +65,10 @@ const ec2Api = {
         Authorization: `Bearer ${jwtToken}`,
       }),
       body: JSON.stringify({ productId: id, method: 'delete' }),
-         method: 'POST',
+      method: 'POST',
     });
     return await response.json();
   },
-
-
 };
 
 export default ec2Api;
