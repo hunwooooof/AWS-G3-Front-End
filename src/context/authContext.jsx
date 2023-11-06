@@ -66,13 +66,14 @@ export const AuthContextProvider = ({ children }) => {
   const nativeLogin = async (body) => {
     setLoading(true);
     const { data } = await ec2Api.signin(body);
-    console.log(data);
     if (data) {
-      const { user } = data;
       const accessToken = data.access_token;
-      setUser(user);
-      setJwtToken(accessToken);
-      window.localStorage.setItem('jwtToken', accessToken);
+      const userData = await ec2Api.getProfile(accessToken);
+      if (userData) {
+        setUser(userData.data);
+        setJwtToken(accessToken);
+        window.localStorage.setItem('jwtToken', accessToken);
+      }
       setLoading(false);
       setIsLogin(true);
       return accessToken;

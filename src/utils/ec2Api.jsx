@@ -10,6 +10,15 @@ const ec2Api = {
     });
     return await response.json();
   },
+  async getProfile(jwtToken) {
+    const response = await fetch(`${this.hostname}/api/user/profile`, {
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
+    });
+    return await response.json();
+  },
   async getAllCoupons() {
     const response = await fetch(`${this.hostname}/api/v1/coupons`);
     return await response.json();
