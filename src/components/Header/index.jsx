@@ -101,17 +101,35 @@ const CategoryLink = styled.a`
 
 const SearchBox = styled.div`
   position: absolute;
+  width: 215px;
   right: 275px;
   top: 30px;
-  ${(props) => (props.$isAutoComplete ? ' background-color: white' : 'height:40px')};
-  width: 214px;
-  border: none;
+  background-color: white;
   outline: none;
   margin-left: auto;
+  padding: 0px 12px;
   border-radius: 20px;
-  /* padding: 3px 45px 3px 20px; */
-  padding: 3px 12px 12px;
   border: solid 1px #979797;
+
+  @media screen and (max-width: 1279px) {
+    width: calc(100% - 110px);
+    ${(props) =>
+      props.$isAutoComplete
+        ? 'border: solid 1px #979797; padding: 1px 24px 12px;'
+        : 'height: 0px; border: none; padding: 0px;'}
+    position: fixed;
+    right: 42px;
+    top: 7px;
+    background-size: 32px;
+  }
+`;
+
+const SearchInput = styled.input`
+  height: 36px;
+  width: 200px;
+  outline: none;
+  border: none;
+  border-radius: 20px;
   background-image: url(${search});
   background-size: 44px;
   background-position: 160px top;
@@ -124,61 +142,41 @@ const SearchBox = styled.div`
     width: 0;
     border: none;
     position: fixed;
-    right: 16px;
-    top: 0;
+    right: 47px;
     background-size: 32px;
-    background-position: right center;
+    background-position: right top;
+    padding: 0 20px;
   }
 
   &:focus {
     @media screen and (max-width: 1279px) {
-      width: calc(100% - 20px);
-      border: solid 1px #979797;
+      width: calc(100% - 120px);
+      border: ${(props) => (props.$isAutoComplete ? 'none' : 'solid 1px #979797')};
     }
   }
 `;
 
-const SearchInput = styled.input`
-  height: 36px;
-  width: 140px;
-  outline: none;
-  border: none;
-  border-bottom: ${(props) => (props.$isAutoComplete ? 'solid 1px #979797' : 'none')};
-  border-radius: 10px;
-  /* padding: 6px 45px 6px 20px; */
-  /* border: solid 1px #979797; */
-  /* background-image: url(${search});
-  background-size: 44px;
-  background-position: 160px top;
-  background-repeat: no-repeat; */
-  font-size: 20px;
-  line-height: 24px;
-  color: #8b572a;
+const Divider = styled.div`
+  width: 85%;
+  height: 1px;
+  border: 1px solid #979797ab;
 
   @media screen and (max-width: 1279px) {
-    width: 0;
-    border: none;
-    position: fixed;
-    right: 16px;
-    background-size: 32px;
-    background-position: right center;
-  }
-
-  &:focus {
-    @media screen and (max-width: 1279px) {
-      width: calc(100% - 20px);
-      border: solid 1px #979797;
-    }
+    margin-top: 35px;
+    width: 98%;
   }
 `;
 
 const Advice = styled.div`
   cursor: pointer;
   font-size: 18px;
+  line-height: 24px;
   color: #828282;
-  margin: 6px 0 0;
+  margin: 6px 0;
   padding: 4px 0 4px 8px;
   border-radius: 8px;
+  background-color: white;
+
   &:hover {
     background: #eee;
   }
@@ -344,8 +342,7 @@ function Header() {
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category');
   const [isProfileMenuShow, setIsProfileMenuShow] = useState(false);
-  // const [isAutoComplete, setIsAutoComplete] = useState(false);
-  const [isAutoComplete, setIsAutoComplete] = useState(true);
+  const [isAutoComplete, setIsAutoComplete] = useState(false);
   const [autoSearch, setAutoSearch] = useState([
     { id: '157', title: '柔軟氣質羊毛圍巾' },
     { id: '156', title: '卡哇伊多功能隨身包' },
@@ -393,10 +390,12 @@ function Header() {
           onChange={(e) => setInputValue(e.target.value)}
           value={inputValue}
         />
+        {isAutoComplete && <Divider />}
         {isAutoComplete &&
           autoSearch &&
           autoSearch.map((advice) => (
             <Advice
+              key={advice.id}
               onClick={() => {
                 setIsAutoComplete(false);
                 navigate(`/products/${advice.id}`);
