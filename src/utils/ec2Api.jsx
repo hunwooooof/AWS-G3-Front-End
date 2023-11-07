@@ -58,6 +58,15 @@ const ec2Api = {
     return await response.json();
   },
 
+  async getUserAllCoupons(jwtToken) {
+    const response = await fetch(`${this.hostname}/api/v1/user-coupons`, {
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
+    });
+    return await response.json();
+  },
   async getUserValidCoupons(jwtToken) {
     const response = await fetch(`${this.hostname}/api/v1/valid-coupons`, {
       headers: new Headers({

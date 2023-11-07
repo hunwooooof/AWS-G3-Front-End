@@ -182,6 +182,7 @@ function Coupon() {
   const { isLogin, jwtToken } = useContext(AuthContext);
   const [couponsTag, setCouponsTag] = useState('All');
   const [allCoupons, setAllCoupons] = useState(null);
+  const [userAllCoupons, setUserAllCoupons] = useState(null);
   const [userValidCoupons, setUserValidCoupons] = useState(null);
   const [userInvalidCoupons, setUserInvalidCoupons] = useState(null);
   const coupons =
@@ -194,6 +195,15 @@ function Coupon() {
       console.log('所有', data);
     }
     getAllCoupons();
+  }, [couponsTag]);
+
+  useEffect(() => {
+    async function getUserAllCoupons() {
+      const { data } = await ec2Api.getUserAllCoupons(jwtToken);
+      setUserAllCoupons(data);
+      console.log('user所有', data);
+    }
+    if (isLogin) getUserAllCoupons();
   }, [couponsTag]);
 
   useEffect(() => {
@@ -268,7 +278,7 @@ function Coupon() {
       <Section>
         {coupons ? (
           coupons.length > 0 ? (
-            userValidCoupons ? (
+            userAllCoupons ? (
               coupons.map((coupon) => {
                 const couponImg =
                   coupon.type === '折扣'
@@ -286,7 +296,7 @@ function Coupon() {
                       <ItemInfo>
                         <ItemInfoName>{coupon.title}</ItemInfoName>
                         {couponsTag === 'All' ? (
-                          userValidCoupons.some((userCoupon) => userCoupon.id === coupon.id) ? (
+                          userAllCoupons.some((userCoupon) => userCoupon.id === coupon.id) ? (
                             <GetButton disabled>已領取</GetButton>
                           ) : coupon.amount === 0 ? (
                             <NoMore>剩下０張</NoMore>
