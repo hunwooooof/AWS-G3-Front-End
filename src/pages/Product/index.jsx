@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import ec2Api from '../../utils/ec2Api';
 import ProductVariants from './ProductVariants';
 import { AuthContext } from '../../context/authContext';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Wrapper = styled.div`
   max-width: 960px;
@@ -235,17 +236,11 @@ function Product() {
           let currentPage = 0;
           async function fetchSinglePageCollections() {
             try {
-              const response = await ec2Api.getCollection(
-                jwtToken,
-                currentPage,
-              );
+              const response = await ec2Api.getCollection(jwtToken, currentPage);
               if (response) {
                 allUserCollections.push(...response.data);
               }
-              if (
-                response.next_paging > 0 &&
-                response.next_paging !== currentPage
-              ) {
+              if (response.next_paging > 0 && response.next_paging !== currentPage) {
                 currentPage = response.next_paging;
                 await fetchSinglePageCollections();
               }
@@ -263,12 +258,8 @@ function Product() {
             setIsLiked(true);
           }
 
-          const localCollection = JSON.parse(
-            localStorage.getItem('collection'),
-          );
-          const userCollectionsId = allUserCollections.map(
-            (product) => product.id,
-          );
+          const localCollection = JSON.parse(localStorage.getItem('collection'));
+          const userCollectionsId = allUserCollections.map((product) => product.id);
 
           let toBeSavedCollections = [];
           localCollection.forEach((product) => {
@@ -284,9 +275,7 @@ function Product() {
           }
           localStorage.setItem('collection', JSON.stringify([]));
         } else {
-          const localCollection = JSON.parse(
-            localStorage.getItem('collection'),
-          );
+          const localCollection = JSON.parse(localStorage.getItem('collection'));
           if (
             localCollection.some((collection) => {
               return collection.id === product.id;
@@ -304,34 +293,28 @@ function Product() {
     const changeCollection = async function () {
       if (product) {
         const localCollection = JSON.parse(localStorage.getItem('collection'));
-        const updatedList = localCollection.filter(
-          (item) => item.id !== product.id,
-        );
+        const updatedList = localCollection.filter((item) => item.id !== product.id);
         if (isLiked) {
           if (isLogin) {
             const response = await ec2Api.addCollection(product.id, jwtToken);
-            console.log(response.message);
+            if (response.message === '已加入收藏') toast.success(response.message);
           } else {
             const isLocalCollected = localCollection.find((item) => {
               return item.id === product.id;
             });
             if (!isLocalCollected) {
               const updatedCollection = [...localCollection, product];
-              localStorage.setItem(
-                'collection',
-                JSON.stringify(updatedCollection),
-              );
+              localStorage.setItem('collection', JSON.stringify(updatedCollection));
+              toast.success('已加入收藏');
             }
           }
         } else {
           if (isLogin) {
-            const response = await ec2Api.deleteCollection(
-              product.id,
-              jwtToken,
-            );
-            console.log(response.message);
+            const response = await ec2Api.deleteCollection(product.id, jwtToken);
+            toast(response.message, { icon: '❌' });
           } else {
             localStorage.setItem('collection', JSON.stringify(updatedList));
+            toast('已刪除收藏', { icon: '❌' });
           }
         }
       }
@@ -344,17 +327,26 @@ function Product() {
   return (
     product && (
       <Wrapper>
+        <Toaster
+          toastOptions={{
+            duration: 1000,
+            style: {
+              background: '#ebebebe8',
+              padding: '5px 10px',
+              textAlign: 'center',
+              color: '#181818',
+              fontSize: '28px',
+              margin: '10px',
+            },
+          }}
+        />{' '}
         <MainImage src={product.main_image} />
         <Details>
           <Title>{product.title}</Title>
           <ID>{product.id}</ID>
           <Price>
             TWD.{product.price}
-            <HeartIcon
-              className="material-icons"
-              onClick={toggleLike}
-              $isLiked={isLiked}
-            >
+            <HeartIcon className='material-icons' onClick={toggleLike} $isLiked={isLiked}>
               {isLiked ? ' favorite' : 'favorite_border'}
             </HeartIcon>
           </Price>
