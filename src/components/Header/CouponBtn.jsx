@@ -6,7 +6,7 @@ import { useState } from 'react';
 const Container = styled.div`
   position: fixed;
   right: 40px;
-  top: 180px;
+  top: 270px;
 `;
 
 const Wrapper = styled.div`

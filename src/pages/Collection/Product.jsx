@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import ec2Api from '../../utils/ec2Api';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/authContext';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Wrapper = styled(Link)`
   width: 100%;
@@ -31,8 +32,8 @@ const Title = styled.p`
   }
 `;
 const Price = styled.p`
-  color: #3f3a3a;
-  font-size: 30px;
+  color: #8d8989;
+  font-size: 26px;
   line-height: 36px;
   @media screen and (max-width: 1279px) {
     font-size: 20px;
@@ -49,80 +50,71 @@ const HeartIcon = styled.span`
   }
 `;
 
-const Product = ({ productInfo }) => {
-  const { isLogin } = useContext(AuthContext);
+const Product = ({ collection, setCollection, productInfo }) => {
+  const { isLogin, jwtToken } = useContext(AuthContext);
   const [isLiked, setIsLiked] = useState(true);
-
   const toggleLike = async () => {
     setIsLiked(!isLiked);
   };
 
-  // 收藏商品
-  //   有登入的話
-  //     不在用戶收藏內的話（防止初始載入重新加入）
-  //       打api加入收藏
-  //   沒登入的話
-  //     不在localstorage的話（防止初始載入重新加入）
-  //       加入localstorage
-  // 刪除收藏
-  //   有登入的話
-  //     刪除用戶收藏
-  //   沒登入的話
-  //     從localstorage collection 刪除此商品
-
   useEffect(() => {
     const localCollection = JSON.parse(localStorage.getItem('collection'));
-    if (isLiked) {
+    if (isLiked && !collection.includes(productInfo)) {
       if (isLogin) {
         const checkIsCollected = async () => {
-          const isCollected = (await ec2Api.getCollection()).data.find(
-            (item) => {
-              return item.id === productInfo.id;
-            },
-          );
+          const isCollected = (await ec2Api.getCollection()).data.find((item) => {
+            return item.id === productInfo.id;
+          });
           if (!isCollected) {
             ec2Api.addCollection(productInfo.id);
           }
         };
+        console.log('hi');
         checkIsCollected();
       } else {
         const isLocalCollected = localCollection.find((item) => {
           return item.id === productInfo.id;
         });
         if (!isLocalCollected) {
-          localStorage.setItem(
-            'collection',
-            JSON.stringify([...localCollection, productInfo]),
-          );
+          localStorage.setItem('collection', JSON.stringify([...localCollection, productInfo]));
         }
       }
-    } else {
+    }
+    if (!isLiked && collection.includes(productInfo)) {
       if (isLogin) {
-        ec2Api.deleteCollection(productInfo.id);
+        async function deleteCollection() {
+          const response = await ec2Api.deleteCollection(productInfo.id, jwtToken);
+          if (response.success) toast(response.message);
+          async function getCollection() {
+            const response = await ec2Api.getCollection(jwtToken);
+            if (response.data) setCollection(response.data);
+            else setCollection(false);
+          }
+          getCollection();
+        }
+        deleteCollection();
       } else {
-        const updatedList = localCollection.filter(
-          (item) => item.id !== productInfo.id,
-        );
+        const updatedList = localCollection.filter((item) => item.id !== productInfo.id);
         localStorage.setItem('collection', JSON.stringify(updatedList));
       }
     }
   }, [isLiked]);
 
   return (
-    <Wrapper to="/product">
+    <Wrapper to={`/products/${productInfo.id}`}>
+      <Toaster />
       <Image src={productInfo.main_image} />
       <Details>
         <Title>{productInfo.title}</Title>
-        {/* <Price>{productInfo.price}</Price> */}
+        <Price>NT. {productInfo.price}</Price>
       </Details>
       <HeartIcon
-        className="material-icons"
+        className='material-icons'
         onClick={(e) => {
           toggleLike();
           e.preventDefault();
         }}
-        $isLiked={isLiked}
-      >
+        $isLiked={isLiked}>
         {isLiked ? ' favorite' : 'favorite_border'}
       </HeartIcon>
     </Wrapper>

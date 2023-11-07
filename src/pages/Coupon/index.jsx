@@ -6,6 +6,7 @@ import disabledDiscountImage from './discount-disabled.webp';
 import disabledFreeFreightImage from './free-freight-fee-disabled.webp';
 import ec2Api from '../../utils/ec2Api';
 import { AuthContext } from '../../context/authContext';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Wrapper = styled.div`
   max-width: 960px;
@@ -190,7 +191,7 @@ function Coupon() {
     async function getAllCoupons() {
       const { data } = await ec2Api.getAllCoupons();
       setAllCoupons(data);
-      console.log('所有優惠券', data);
+      console.log('所有', data);
     }
     getAllCoupons();
   }, [couponsTag]);
@@ -198,8 +199,8 @@ function Coupon() {
   useEffect(() => {
     async function getUserValidCoupons() {
       const { data } = await ec2Api.getUserValidCoupons(jwtToken);
-      setUserValidCoupons(data.filter((coupon) => coupon.amount !== 0));
-      console.log('使用者可用優惠券', data);
+      setUserValidCoupons(data);
+      console.log('可用', data);
     }
     if (isLogin) getUserValidCoupons();
   }, [couponsTag]);
@@ -208,7 +209,7 @@ function Coupon() {
     async function getUserInvalidCoupons() {
       const { data } = await ec2Api.getUserInvalidCoupons(jwtToken);
       setUserInvalidCoupons(data);
-      console.log('使用者已失效優惠券', data);
+      console.log('已失效', data);
     }
     if (isLogin) getUserInvalidCoupons();
   }, [couponsTag]);
@@ -217,7 +218,7 @@ function Coupon() {
     e.target.id !== 'All'
       ? isLogin
         ? setCouponsTag(e.target.id)
-        : alert('請先登入再查看優惠券！')
+        : toast('請先登入再查看優惠券', { icon: '❗️' })
       : setCouponsTag(e.target.id);
   };
 
@@ -225,15 +226,34 @@ function Coupon() {
     async function postClaimCoupon() {
       const response = await ec2Api.postClaimCoupon(e.target.id, jwtToken);
       if (response) {
-        response.success ? alert('優惠券歸戶成功！') : null;
+        response.success ? toast.success('優惠券歸戶成功！') : null;
+        async function getUserValidCoupons() {
+          const { data } = await ec2Api.getUserValidCoupons(jwtToken);
+          setUserValidCoupons(data);
+          console.log('可用', data);
+        }
+        getUserValidCoupons();
       }
     }
-    isLogin ? postClaimCoupon() : alert('請先登入');
+    isLogin ? postClaimCoupon() : toast('請先登入', { icon: '❗️' });
   };
 
   return (
     <Wrapper>
       <Title>優惠券專區</Title>
+      <Toaster
+        toastOptions={{
+          duration: 1000,
+          style: {
+            background: '#ebebebd1',
+            padding: '5px 10px',
+            textAlign: 'center',
+            color: '#181818',
+            fontSize: '28px',
+            margin: '10px',
+          },
+        }}
+      />
       <SubTitle>
         <Tag id='All' onClick={handleCouponTag} $isActive={couponsTag === 'All'}>
           未領取
