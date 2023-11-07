@@ -9,6 +9,7 @@ import logo from './logo.png';
 import profileMobile from './profile-mobile.png';
 import profile from './profile.png';
 import search from './search.png';
+import CouponBtn from './CouponBtn';
 
 const Wrapper = styled.div`
   position: fixed;
@@ -356,6 +357,7 @@ function Header() {
           </CollapsibleMenu>
         )}
       </PageLinks>
+      <CouponBtn />
     </Wrapper>
   );
 }

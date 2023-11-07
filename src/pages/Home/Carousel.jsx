@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import api from '../../utils/api';
+import ec2Api from '../../utils/ec2Api';
 
 const Wrapper = styled.div`
   height: 500px;
@@ -101,12 +101,10 @@ function Carousel() {
 
   useEffect(() => {
     async function getCampaigns() {
-      const { data } = await api.getCampaigns();
+      const { data } = await ec2Api.getCampaigns();
       setCampaigns(data);
       intervalRef.current = window.setInterval(() => {
-        setActiveCampaignIndex((prev) =>
-          prev === data.length - 1 ? 0 : prev + 1
-        );
+        setActiveCampaignIndex((prev) => (prev === data.length - 1 ? 0 : prev + 1));
       }, 5000);
     }
     getCampaigns();
@@ -119,12 +117,9 @@ function Carousel() {
           $isActive={index === activeCampaignIndex}
           $backgroundImageUrl={picture}
           key={index}
-          to={`/products/${product_id}`}
-        >
+          to={`/products/${product_id}`}>
           <Story>
-            <StoryContent>
-              {story.split('\r\n').slice(0, 3).join('\r\n')}
-            </StoryContent>
+            <StoryContent>{story.split('\r\n').slice(0, 3).join('\r\n')}</StoryContent>
             <StoryTitle>{story.split('\r\n')[3]}</StoryTitle>
           </Story>
         </Campaign>
@@ -138,9 +133,7 @@ function Carousel() {
               setActiveCampaignIndex(index);
               window.clearInterval(intervalRef.current);
               intervalRef.current = window.setInterval(() => {
-                setActiveCampaignIndex((prev) =>
-                  prev === campaigns.length - 1 ? 0 : prev + 1
-                );
+                setActiveCampaignIndex((prev) => (prev === campaigns.length - 1 ? 0 : prev + 1));
               }, 5000);
             }}
           />
