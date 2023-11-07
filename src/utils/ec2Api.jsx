@@ -19,6 +19,10 @@ const ec2Api = {
     const response = await fetch(`${this.hostname}/api/products/search?keyword=${keyword}&paging=${paging}`);
     return await response.json();
   },
+  async autoSearchProducts(keyword) {
+    const response = await fetch(`${this.hostname}/api/products/autosearch?keyword=${keyword}`);
+    return await response.json();
+  },
 
   async getProduct(id) {
     const response = await fetch(`${this.hostname}/api/products/details?id=${id}`);

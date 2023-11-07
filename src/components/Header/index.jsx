@@ -10,6 +10,7 @@ import profileMobile from './profile-mobile.png';
 import profile from './profile.png';
 import search from './search.png';
 import CouponBtn from './CouponBtn';
+import ec2Api from '../../utils/ec2Api';
 
 const Wrapper = styled.div`
   position: fixed;
@@ -146,12 +147,9 @@ const SearchInput = styled.input`
     background-size: 32px;
     background-position: right top;
     padding: 0 20px;
-  }
-
-  &:focus {
-    @media screen and (max-width: 1279px) {
+    &:focus {
       width: calc(100% - 120px);
-      border: ${(props) => (props.$isAutoComplete ? 'none' : 'solid 1px #979797')};
+      border: solid 1px #d3d3d3;
     }
   }
 `;
@@ -343,14 +341,25 @@ function Header() {
   const category = searchParams.get('category');
   const [isProfileMenuShow, setIsProfileMenuShow] = useState(false);
   const [isAutoComplete, setIsAutoComplete] = useState(false);
-  const [autoSearch, setAutoSearch] = useState([
-    { id: '157', title: '柔軟氣質羊毛圍巾' },
-    { id: '156', title: '卡哇伊多功能隨身包' },
-  ]);
+  const [autoSearch, setAutoSearch] = useState();
 
   useEffect(() => {
     if (category) setInputValue('');
   }, [category]);
+
+  useEffect(() => {
+    async function autoSearchProducts() {
+      const response = await ec2Api.autoSearchProducts(inputValue);
+      if (response.total > 0) {
+        console.log(response);
+        setAutoSearch(response.products);
+        setIsAutoComplete(true);
+      } else {
+        setIsAutoComplete(false);
+      }
+    }
+    autoSearchProducts();
+  }, [inputValue]);
 
   const handleProfileMenuShow = (e) => {
     e.stopPropagation();
@@ -362,7 +371,11 @@ function Header() {
   };
 
   return (
-    <Wrapper onClick={handleProfileMenuNotShow}>
+    <Wrapper
+      onClick={() => {
+        handleProfileMenuNotShow();
+        setIsAutoComplete(false);
+      }}>
       <Logo to='/' />
       <CategoryLinks>
         {categories.map(({ name, displayText }, index) => (
