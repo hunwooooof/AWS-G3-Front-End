@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import ReactLoading from 'react-loading';
 import { Link, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import api from '../../utils/api';
+import ec2Api from '../../utils/ec2Api';
 
 const Wrapper = styled.div`
   max-width: 1200px;
@@ -112,8 +112,8 @@ function Products() {
       isFetching = true;
       setIsLoading(true);
       const response = keyword
-        ? await api.searchProducts(keyword, nextPaging)
-        : await api.getProducts(category, nextPaging);
+        ? await ec2Api.searchProducts(keyword, nextPaging)
+        : await ec2Api.getProducts(category, nextPaging);
       if (nextPaging === 0) {
         setProducts(response.data);
       } else {

@@ -153,7 +153,7 @@ const ExpireDate = styled.div`
   }
 `;
 
-const warning = styled.div`
+const Warning = styled.div`
   letter-spacing: 2px;
   margin-top: 50px;
   text-align: center;
@@ -163,12 +163,18 @@ const warning = styled.div`
   }
 `;
 
-const NoCoupon = styled(warning)`
+const NoCoupon = styled(Warning)`
   color: #cbcbcb;
 `;
 
-const Loading = styled(warning)`
+const Loading = styled(Warning)`
   color: #cbcbcb;
+`;
+
+const NoMore = styled(Warning)`
+  color: #ff7373;
+  margin-top: 0px;
+  font-size: 20px;
 `;
 
 function Coupon() {
@@ -192,7 +198,7 @@ function Coupon() {
   useEffect(() => {
     async function getUserValidCoupons() {
       const { data } = await ec2Api.getUserValidCoupons(jwtToken);
-      setUserValidCoupons(data);
+      setUserValidCoupons(data.filter((coupon) => coupon.amount !== 0));
       console.log('使用者可用優惠券', data);
     }
     if (isLogin) getUserValidCoupons();
@@ -217,8 +223,10 @@ function Coupon() {
 
   const handleClaimCoupon = (e) => {
     async function postClaimCoupon() {
-      const { data } = await ec2Api.postClaimCoupon(e.target.id, jwtToken);
-      console.log(data);
+      const response = await ec2Api.postClaimCoupon(e.target.id, jwtToken);
+      if (response) {
+        response.success ? alert('優惠券歸戶成功！') : null;
+      }
     }
     isLogin ? postClaimCoupon() : alert('請先登入');
   };
@@ -260,6 +268,8 @@ function Coupon() {
                         {couponsTag === 'All' ? (
                           userValidCoupons.some((userCoupon) => userCoupon.id === coupon.id) ? (
                             <GetButton disabled>已領取</GetButton>
+                          ) : coupon.amount === 0 ? (
+                            <NoMore>剩下０張</NoMore>
                           ) : (
                             <GetButton onClick={handleClaimCoupon} id={coupon.id}>
                               領取
