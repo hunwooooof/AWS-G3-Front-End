@@ -43,6 +43,7 @@ const Button = styled(Link)`
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  box-shadow: 0px 0px 10px #1c1c1ce0;
   background-color: #ffc928;
   &:hover {
     box-shadow: 0px 0px 10px #e4e4e4;
