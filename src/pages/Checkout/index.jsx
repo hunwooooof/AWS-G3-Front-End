@@ -1,12 +1,14 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Button from '../../components/Button';
 import { AuthContext } from '../../context/authContext';
 import { CartContext } from '../../context/cartContext';
-import api from '../../utils/api';
+import ec2Api from '../../utils/ec2Api';
 import tappay from '../../utils/tappay';
 import Cart from './Cart';
+import discountImage from './discount.webp';
+import freeFreightImage from './free-freight-fee.webp';
 
 const Wrapper = styled.div`
   margin: 0 auto;
@@ -137,7 +139,7 @@ const FormControl = styled.input`
   width: 574px;
   height: 30px;
   border-radius: 8px;
-  border: solid 1px ${({ invalid }) => invalid ? '#CB4042' : '#979797'};
+  border: solid 1px ${({ invalid }) => (invalid ? '#CB4042' : '#979797')};
 
   @media screen and (max-width: 1279px) {
     margin-top: 10px;
@@ -209,6 +211,14 @@ const SubtotalPrice = styled(Price)`
 
 const ShippingPrice = styled(Price)`
   margin-top: 20px;
+
+  @media screen and (max-width: 1279px) {
+    margin-top: 20px;
+  }
+`;
+
+const CouponDiscount = styled(Price)`
+  margin-top: 20px;
   padding-bottom: 20px;
   border-bottom: 1px solid #3f3a3a;
 
@@ -252,6 +262,156 @@ const PriceValue = styled.div`
   color: #3f3a3a;
 `;
 
+const CouponWrap = styled.div``;
+const CouponWrapTitle = styled.p`
+  line-height: 19px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #3f3a3a;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #3f3a3a;
+  width: 100%;
+  margin-top: 50px;
+`;
+const CouponButton = styled.p`
+  margin-top: 25px;
+  border: none;
+  background-color: transparent;
+  color: #919191;
+  cursor: pointer;
+`;
+
+const SelectWindowBackground = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  width: 100%;
+  padding: 10rem 8rem;
+`;
+const SelectWindow = styled.div`
+  position: relative;
+  background-color: white;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  padding: 2.5rem;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  @media screen and (max-width: 1279px) {
+    min-height: 600px;
+  }
+`;
+const SelectWindowTitle = styled.div`
+  font-size: 30px;
+`;
+const ButtonWrap = styled.div`
+  bottom: 2rem;
+  margin-top: 1.5rem;
+  border-radius: 10px;
+  margin-left: auto;
+  display: flex;
+  flex-wrap: nowrap;
+  @media screen and (max-width: 1279px) {
+    max-width: 100%;
+  }
+`;
+
+const Cancel = styled.button`
+  height: 40px;
+  width: 150px;
+  background-color: white;
+  border: 1px #bababa solid;
+  color: #bababa;
+  margin-right: 0.5rem;
+  @media screen and (max-width: 1279px) {
+    margin-right: 0;
+    max-width: 100%;
+  }
+`;
+const Confirm = styled.button`
+  height: 40px;
+  width: 150px;
+  background-color: #313538;
+  color: white;
+  border: none;
+  @media screen and (max-width: 1279px) {
+    max-width: 100%;
+  }
+`;
+
+const SelectWindowCouponWrap = styled.div`
+  height: 100%;
+  margin-top: 2rem;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+const Coupon = styled.div`
+  background-color: #f0f0f0;
+  height: 10rem;
+  display: flex;
+`;
+
+const CouponImage = styled.img`
+  height: 100%;
+  margin-right: 1rem;
+`;
+const CouponInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 1rem 0;
+`;
+const CouponTitle = styled.p`
+  font-size: 20px;
+`;
+const CouponDate = styled.p`
+  color: #bababa;
+`;
+
+const SelectCouponButton = styled.button`
+  margin: auto 1.5rem auto auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  border: 1px #bababa solid;
+  cursor: pointer;
+
+  background-color: ${(props) => (props.isActive ? '#dc5f45' : '#f0f0f0')};
+`;
+
+const SelectedCouponWrap = styled.div`
+  display: flex;
+  margin-top: 25px;
+`;
+
+const ChangeSelectedCouponButton = styled.p`
+  border: none;
+  background-color: transparent;
+  color: #919191;
+  margin-left: 2rem;
+  cursor: pointer;
+`;
+const EmptyMessage = styled.p`
+  margin: auto;
+  font-size: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #bababa;
+  letter-spacing: 1.5px;
+`;
+const EmptyLink = styled(Link)`
+  color: #6da6e0;
+  text-decoration: none;
+`;
 const formInputs = [
   {
     label: '收件人姓名',
@@ -288,6 +448,10 @@ function Checkout() {
   });
   const [invalidFields, setInvalidFields] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isSelectingCoupon, setIsSelectingCoupon] = useState(false);
+  const [validCoupon, setValidCoupon] = useState([]);
+  const [redButtonIndex, setRedButtonIndex] = useState(0);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
   const navigate = useNavigate();
   const cardNumberRef = useRef();
   const cardExpirationDateRef = useRef();
@@ -303,22 +467,28 @@ function Checkout() {
       tappay.setupCard(
         cardNumberRef.current,
         cardExpirationDateRef.current,
-        cardCCVRef.current
+        cardCCVRef.current,
       );
-    }
+    };
     setupTappay();
   }, []);
 
   const subtotal = cartItems.reduce(
     (prev, item) => prev + item.price * item.qty,
-    0
+    0,
   );
 
   const freight = 30;
 
+  const couponDiscount = () => {
+    return selectedCoupon && selectedCoupon.type === '免運'
+      ? -freight
+      : Math.round(-((subtotal * selectedCoupon.discount) / 100));
+  };
+
   async function checkout() {
     try {
-      setLoading(true);      
+      setLoading(true);
 
       const token = isLogin ? jwtToken : await login();
 
@@ -331,45 +501,76 @@ function Checkout() {
         window.alert('尚未選購商品');
         return;
       }
-  
+
       if (Object.values(recipient).some((value) => !value)) {
         window.alert('請填寫完整訂購資料');
-        setInvalidFields(Object.keys(recipient).filter(key => !recipient[key]))
+        setInvalidFields(
+          Object.keys(recipient).filter((key) => !recipient[key]),
+        );
         formRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
+          behavior: 'smooth',
+          block: 'center',
         });
         return;
       }
-  
+
       if (!tappay.canGetPrime()) {
         window.alert('付款資料輸入有誤');
         return;
       }
-  
+
       const result = await tappay.getPrime();
       if (result.status !== 0) {
         window.alert('付款資料輸入有誤');
         return;
       }
-  
-      const { data } = await api.checkout(
+      const finalFreight =
+        selectedCoupon && selectedCoupon.type === '免運' ? 0 : freight;
+      const finalSubtotal =
+        selectedCoupon && selectedCoupon.type === '折扣'
+          ? Math.round(subtotal - (subtotal * selectedCoupon.discount) / 100)
+          : subtotal;
+
+      const newCartItems = cartItems.map((item) => {
+        const { image, stock, ...newItem } = item;
+        return newItem;
+      });
+
+      console.log(
         {
           prime: result.card.prime,
+          couponId: selectedCoupon && selectedCoupon.id,
           order: {
             shipping: 'delivery',
             payment: 'credit_card',
-            subtotal,
-            freight,
-            total: subtotal + freight,
+            subtotal: finalSubtotal,
+            freight: finalFreight,
+            total: finalSubtotal + finalFreight,
             recipient,
-            list: cartItems,
+            list: newCartItems,
           },
         },
-        token
+        jwtToken,
+      );
+      const { data } = await ec2Api.checkout(
+        {
+          prime: result.card.prime,
+          couponId: selectedCoupon && selectedCoupon.id,
+          order: {
+            shipping: 'delivery',
+            payment: 'credit_card',
+            subtotal: finalSubtotal,
+            freight: finalFreight,
+            total: finalSubtotal + finalFreight,
+            recipient,
+            list: newCartItems,
+          },
+        },
+        jwtToken,
       );
       window.alert('付款成功');
       setCartItems([]);
+      getValidCoupon();
       navigate('/thankyou', { state: { orderNumber: data.number } });
     } catch (err) {
       console.log(err);
@@ -377,6 +578,19 @@ function Checkout() {
       setLoading(false);
     }
   }
+
+  const getValidCoupon = async function () {
+    const response = await ec2Api.getUserValidCoupons(jwtToken);
+    setValidCoupon(response.data);
+  };
+
+  useEffect(() => {
+    getValidCoupon();
+  }, []);
+
+  useEffect(() => {
+    console.log(validCoupon);
+  }, [validCoupon]);
 
   return (
     <Wrapper>
@@ -445,6 +659,104 @@ function Checkout() {
           </FormGroup>
         </FormFieldSet>
       </form>
+
+      <CouponWrap>
+        <CouponWrapTitle>優惠券</CouponWrapTitle>
+        {!selectedCoupon ? (
+          <CouponButton
+            onClick={() => {
+              setIsSelectingCoupon(!isSelectingCoupon);
+            }}
+          >
+            選擇優惠券
+          </CouponButton>
+        ) : (
+          <SelectedCouponWrap>
+            <span style={{ color: 'black', marginRight: '1rem' }}>已選取</span>
+            <span style={{ color: '#8b572a' }}>
+              {selectedCoupon.title} {selectedCoupon.type}券
+            </span>
+
+            <ChangeSelectedCouponButton
+              onClick={() => {
+                setIsSelectingCoupon(!isSelectingCoupon);
+              }}
+            >
+              變更
+            </ChangeSelectedCouponButton>
+          </SelectedCouponWrap>
+        )}
+      </CouponWrap>
+      {isSelectingCoupon && (
+        <SelectWindowBackground>
+          <SelectWindow>
+            <SelectWindowTitle>選擇優惠券</SelectWindowTitle>
+            <SelectWindowCouponWrap>
+              {validCoupon && validCoupon.length > 0 ? (
+                validCoupon.map((coupon, index) => {
+                  return (
+                    <Coupon key={coupon.id}>
+                      <CouponImage
+                        src={
+                          coupon.type === '免運'
+                            ? freeFreightImage
+                            : discountImage
+                        }
+                      ></CouponImage>
+                      <CouponInfo>
+                        <CouponTitle>{coupon.title}</CouponTitle>
+                        <CouponDate>有效日期 {coupon.expiredDate}</CouponDate>
+                      </CouponInfo>
+
+                      <SelectCouponButton
+                        isActive={index === redButtonIndex}
+                        onClick={() => {
+                          console.log(index);
+                          setRedButtonIndex(index);
+                        }}
+                      ></SelectCouponButton>
+                    </Coupon>
+                  );
+                })
+              ) : (
+                <EmptyMessage>
+                  <span>目前沒有優惠券哦</span>
+                  <br />
+                  <span
+                    style={{
+                      fontSize: '16px',
+                      marginTop: '10px',
+                    }}
+                  >
+                    前往
+                    <EmptyLink to={`/coupon`}>優惠券專區</EmptyLink>
+                    領取
+                  </span>
+                </EmptyMessage>
+              )}
+            </SelectWindowCouponWrap>
+
+            <ButtonWrap>
+              <Cancel
+                onClick={() => {
+                  setIsSelectingCoupon(!isSelectingCoupon);
+                }}
+              >
+                取消
+              </Cancel>
+              <Confirm
+                onClick={() => {
+                  setSelectedCoupon(validCoupon[redButtonIndex]);
+                  setIsSelectingCoupon(!isSelectingCoupon);
+                }}
+              >
+                好
+              </Confirm>
+            </ButtonWrap>
+          </SelectWindow>
+        </SelectWindowBackground>
+      )}
+
       <SubtotalPrice>
         <PriceName>總金額</PriceName>
         <Currency>NT.</Currency>
@@ -455,12 +767,27 @@ function Checkout() {
         <Currency>NT.</Currency>
         <PriceValue>{freight}</PriceValue>
       </ShippingPrice>
+
+      {selectedCoupon ? (
+        <CouponDiscount>
+          <PriceName>{selectedCoupon.type}</PriceName>
+          <Currency>NT.</Currency>
+          <PriceValue>{couponDiscount()}</PriceValue>
+        </CouponDiscount>
+      ) : (
+        <></>
+      )}
+
       <TotalPrice>
         <PriceName>應付金額</PriceName>
         <Currency>NT.</Currency>
-        <PriceValue>{subtotal + freight}</PriceValue>
+        <PriceValue>
+          {subtotal + freight + (selectedCoupon && couponDiscount())}
+        </PriceValue>
       </TotalPrice>
-      <Button loading={loading} onClick={checkout}>確認付款</Button>
+      <Button loading={loading} onClick={checkout}>
+        確認付款
+      </Button>
     </Wrapper>
   );
 }

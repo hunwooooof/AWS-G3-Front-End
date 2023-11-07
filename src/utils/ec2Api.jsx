@@ -108,6 +108,17 @@ const ec2Api = {
     });
     return await response.json();
   },
+  async checkout(data, jwtToken) {
+    const response = await fetch(`${this.hostname}/api/order/checkout`, {
+      body: JSON.stringify(data),
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
+      method: 'POST',
+    });
+    return await response.json();
+  },
 };
 
 export default ec2Api;
