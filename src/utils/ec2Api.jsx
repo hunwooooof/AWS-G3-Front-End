@@ -40,7 +40,6 @@ const ec2Api = {
   },
   async postClaimCoupon(id, jwtToken) {
     const response = await fetch(`${this.hostname}/api/v1/coupons`, {
-
       body: JSON.stringify({ id: id }),
       headers: new Headers({
         'Content-Type': 'application/json',
@@ -100,6 +99,17 @@ const ec2Api = {
         Authorization: `Bearer ${jwtToken}`,
       }),
       body: JSON.stringify({ productId: id, method: 'delete' }),
+      method: 'POST',
+    });
+    return await response.json();
+  },
+  async checkout(data, jwtToken) {
+    const response = await fetch(`${this.hostname}/api/order/checkout`, {
+      body: JSON.stringify(data),
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+      }),
       method: 'POST',
     });
     return await response.json();
