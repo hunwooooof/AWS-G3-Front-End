@@ -99,19 +99,58 @@ const CategoryLink = styled.a`
   }
 `;
 
-const SearchInput = styled.input`
-  height: 40px;
+const SearchBox = styled.div`
+  position: absolute;
+  right: 275px;
+  top: 30px;
+  ${(props) => (props.$isAutoComplete ? ' background-color: white' : 'height:40px')};
   width: 214px;
   border: none;
   outline: none;
   margin-left: auto;
   border-radius: 20px;
-  padding: 6px 45px 6px 20px;
+  /* padding: 3px 45px 3px 20px; */
+  padding: 3px 12px 12px;
   border: solid 1px #979797;
   background-image: url(${search});
   background-size: 44px;
-  background-position: 160px center;
+  background-position: 160px top;
   background-repeat: no-repeat;
+  font-size: 20px;
+  line-height: 24px;
+  color: #8b572a;
+
+  @media screen and (max-width: 1279px) {
+    width: 0;
+    border: none;
+    position: fixed;
+    right: 16px;
+    top: 0;
+    background-size: 32px;
+    background-position: right center;
+  }
+
+  &:focus {
+    @media screen and (max-width: 1279px) {
+      width: calc(100% - 20px);
+      border: solid 1px #979797;
+    }
+  }
+`;
+
+const SearchInput = styled.input`
+  height: 36px;
+  width: 140px;
+  outline: none;
+  border: none;
+  border-bottom: ${(props) => (props.$isAutoComplete ? 'solid 1px #979797' : 'none')};
+  border-radius: 10px;
+  /* padding: 6px 45px 6px 20px; */
+  /* border: solid 1px #979797; */
+  /* background-image: url(${search});
+  background-size: 44px;
+  background-position: 160px top;
+  background-repeat: no-repeat; */
   font-size: 20px;
   line-height: 24px;
   color: #8b572a;
@@ -133,8 +172,20 @@ const SearchInput = styled.input`
   }
 `;
 
+const Advice = styled.div`
+  cursor: pointer;
+  font-size: 18px;
+  color: #828282;
+  margin: 6px 0 0;
+  padding: 4px 0 4px 8px;
+  border-radius: 8px;
+  &:hover {
+    background: #eee;
+  }
+`;
+
 const PageLinks = styled.div`
-  margin-left: 42px;
+  margin-left: auto;
   display: flex;
 
   @media screen and (max-width: 1279px) {
@@ -264,7 +315,6 @@ const PageLinkIconNumber = styled.div`
 
 const PageLinkText = styled.div`
   display: none;
-
   @media screen and (max-width: 1279px) {
     display: block;
     color: white;
@@ -294,6 +344,12 @@ function Header() {
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category');
   const [isProfileMenuShow, setIsProfileMenuShow] = useState(false);
+  // const [isAutoComplete, setIsAutoComplete] = useState(false);
+  const [isAutoComplete, setIsAutoComplete] = useState(true);
+  const [autoSearch, setAutoSearch] = useState([
+    { id: '157', title: '柔軟氣質羊毛圍巾' },
+    { id: '156', title: '卡哇伊多功能隨身包' },
+  ]);
 
   useEffect(() => {
     if (category) setInputValue('');
@@ -327,15 +383,28 @@ function Header() {
           </CategoryLink>
         ))}
       </CategoryLinks>
-      <SearchInput
-        onKeyPress={(e) => {
-          if (e.key === 'Enter') {
-            navigate(`/?keyword=${inputValue}`);
-          }
-        }}
-        onChange={(e) => setInputValue(e.target.value)}
-        value={inputValue}
-      />
+      <SearchBox $isAutoComplete={isAutoComplete}>
+        <SearchInput
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              navigate(`/?keyword=${inputValue}`);
+            }
+          }}
+          onChange={(e) => setInputValue(e.target.value)}
+          value={inputValue}
+        />
+        {isAutoComplete &&
+          autoSearch &&
+          autoSearch.map((advice) => (
+            <Advice
+              onClick={() => {
+                setIsAutoComplete(false);
+                navigate(`/products/${advice.id}`);
+              }}>
+              {advice.title}
+            </Advice>
+          ))}
+      </SearchBox>
       <PageLinks>
         <PageLink to='/checkout'>
           <PageLinkCartIcon icon={cart}>
