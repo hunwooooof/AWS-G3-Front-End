@@ -1,7 +1,6 @@
 import { createContext, useCallback, useEffect, useState } from 'react';
-import api from '../utils/api';
-import fb from '../utils/fb';
 import ec2Api from '../utils/ec2Api';
+import fb from '../utils/fb';
 
 export const AuthContext = createContext({
   isLogin: false,
@@ -21,13 +20,12 @@ export const AuthContextProvider = ({ children }) => {
 
   const handleLoginResponse = useCallback(async (response) => {
     const accessToken = response.authResponse.accessToken;
-    const { data } = await api.signin({
+    const { data } = await ec2Api.signin({
       provider: 'facebook',
       access_token: accessToken,
     });
     const { access_token: tokenFromServer, user: userData } = data;
     setUser(userData);
-    console.log(userData);
     setJwtToken(tokenFromServer);
     window.localStorage.setItem('jwtToken', tokenFromServer);
     setIsLogin(true);
@@ -108,7 +106,8 @@ export const AuthContextProvider = ({ children }) => {
         login,
         nativeLogin,
         logout,
-      }}>
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

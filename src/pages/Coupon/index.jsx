@@ -178,6 +178,18 @@ const NoMore = styled(Warning)`
   font-size: 20px;
 `;
 
+const MyToaster = styled(Toaster)`
+  background: #ebebebd1;
+  padding: 5px 10px;
+  text-align: center;
+  color: #181818;
+  font-size: 28px;
+  margin: 10px;
+  @media screen and (max-width: 1279px) {
+    font-size: 1px;
+  }
+`;
+
 function Coupon() {
   const { isLogin, jwtToken } = useContext(AuthContext);
   const [couponsTag, setCouponsTag] = useState('All');
@@ -186,7 +198,11 @@ function Coupon() {
   const [userValidCoupons, setUserValidCoupons] = useState(null);
   const [userInvalidCoupons, setUserInvalidCoupons] = useState(null);
   const coupons =
-    couponsTag === 'All' ? allCoupons : couponsTag === 'UserCoupons' ? userValidCoupons : userInvalidCoupons;
+    couponsTag === 'All'
+      ? allCoupons
+      : couponsTag === 'UserCoupons'
+      ? userValidCoupons
+      : userInvalidCoupons;
 
   useEffect(() => {
     async function getAllCoupons() {
@@ -251,27 +267,31 @@ function Coupon() {
   return (
     <Wrapper>
       <Title>優惠券專區</Title>
-      <Toaster
+      <MyToaster
         toastOptions={{
           duration: 1000,
-          style: {
-            background: '#ebebebd1',
-            padding: '5px 10px',
-            textAlign: 'center',
-            color: '#181818',
-            fontSize: '28px',
-            margin: '10px',
-          },
         }}
       />
       <SubTitle>
-        <Tag id='All' onClick={handleCouponTag} $isActive={couponsTag === 'All'}>
+        <Tag
+          id="All"
+          onClick={handleCouponTag}
+          $isActive={couponsTag === 'All'}
+        >
           未領取
         </Tag>
-        <Tag id='UserCoupons' onClick={handleCouponTag} $isActive={couponsTag === 'UserCoupons'}>
+        <Tag
+          id="UserCoupons"
+          onClick={handleCouponTag}
+          $isActive={couponsTag === 'UserCoupons'}
+        >
           已領取
         </Tag>
-        <Tag id='CouponHistory' onClick={handleCouponTag} $isActive={couponsTag === 'CouponHistory'}>
+        <Tag
+          id="CouponHistory"
+          onClick={handleCouponTag}
+          $isActive={couponsTag === 'CouponHistory'}
+        >
           歷史紀錄
         </Tag>
       </SubTitle>
@@ -291,17 +311,22 @@ function Coupon() {
                 const expiredDate = coupon.expiredDate.slice(0, 10);
                 return (
                   <Item key={coupon.id}>
-                    <Img src={couponImg} alt='coupon.couponTitle' />
+                    <Img src={couponImg} alt="coupon.couponTitle" />
                     <ItemDetail>
                       <ItemInfo>
                         <ItemInfoName>{coupon.title}</ItemInfoName>
                         {couponsTag === 'All' ? (
-                          userAllCoupons.some((userCoupon) => userCoupon.id === coupon.id) ? (
+                          userAllCoupons.some(
+                            (userCoupon) => userCoupon.id === coupon.id,
+                          ) ? (
                             <GetButton disabled>已領取</GetButton>
                           ) : coupon.amount === 0 ? (
                             <NoMore>剩下０張</NoMore>
                           ) : (
-                            <GetButton onClick={handleClaimCoupon} id={coupon.id}>
+                            <GetButton
+                              onClick={handleClaimCoupon}
+                              id={coupon.id}
+                            >
                               領取
                             </GetButton>
                           )
@@ -314,11 +339,12 @@ function Coupon() {
               })
             ) : (
               coupons.map((coupon) => {
-                const couponImg = coupon.type === '折扣' ? discountImage : freeFreightImage;
+                const couponImg =
+                  coupon.type === '折扣' ? discountImage : freeFreightImage;
                 const expiredDate = coupon.expiredDate.slice(0, 10);
                 return (
                   <Item key={coupon.id}>
-                    <Img src={couponImg} alt='coupon.couponTitle' />
+                    <Img src={couponImg} alt="coupon.couponTitle" />
                     <ItemDetail>
                       <ItemInfo>
                         <ItemInfoName>{coupon.title}</ItemInfoName>

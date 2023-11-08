@@ -236,11 +236,17 @@ function Product() {
           let currentPage = 0;
           async function fetchSinglePageCollections() {
             try {
-              const response = await ec2Api.getCollection(jwtToken, currentPage);
+              const response = await ec2Api.getCollection(
+                jwtToken,
+                currentPage,
+              );
               if (response) {
                 allUserCollections.push(...response.data);
               }
-              if (response.next_paging > 0 && response.next_paging !== currentPage) {
+              if (
+                response.next_paging > 0 &&
+                response.next_paging !== currentPage
+              ) {
                 currentPage = response.next_paging;
                 await fetchSinglePageCollections();
               }
@@ -258,8 +264,12 @@ function Product() {
             setIsLiked(true);
           }
 
-          const localCollection = JSON.parse(localStorage.getItem('collection'));
-          const userCollectionsId = allUserCollections.map((product) => product.id);
+          const localCollection = JSON.parse(
+            localStorage.getItem('collection'),
+          );
+          const userCollectionsId = allUserCollections.map(
+            (product) => product.id,
+          );
 
           let toBeSavedCollections = [];
           localCollection.forEach((product) => {
@@ -275,7 +285,9 @@ function Product() {
           }
           localStorage.setItem('collection', JSON.stringify([]));
         } else {
-          const localCollection = JSON.parse(localStorage.getItem('collection'));
+          const localCollection = JSON.parse(
+            localStorage.getItem('collection'),
+          );
           if (
             localCollection.some((collection) => {
               return collection.id === product.id;
@@ -296,20 +308,35 @@ function Product() {
         if (isLiked) {
           if (isLogin) {
             const response = await ec2Api.addCollection(product.id, jwtToken);
-            if (response.message === '已加入收藏') toast.success(response.message);
+            if (response.message === '已加入收藏')
+              toast.success(response.message);
           }
-          if (!isLogin && !localCollection.some((each) => each.id === product.id)) {
+          if (
+            !isLogin &&
+            !localCollection.some((each) => each.id === product.id)
+          ) {
             const updatedCollection = [...localCollection, product];
-            localStorage.setItem('collection', JSON.stringify(updatedCollection));
+            localStorage.setItem(
+              'collection',
+              JSON.stringify(updatedCollection),
+            );
             toast.success('已加入收藏');
           }
         } else {
           if (isLogin) {
-            const response = await ec2Api.deleteCollection(product.id, jwtToken);
+            const response = await ec2Api.deleteCollection(
+              product.id,
+              jwtToken,
+            );
             toast(response.message, { icon: '❌' });
           }
-          if (!isLogin && localCollection.some((each) => each.id === product.id)) {
-            const updatedList = localCollection.filter((item) => item.id !== product.id);
+          if (
+            !isLogin &&
+            localCollection.some((each) => each.id === product.id)
+          ) {
+            const updatedList = localCollection.filter(
+              (item) => item.id !== product.id,
+            );
             localStorage.setItem('collection', JSON.stringify(updatedList));
             toast('已刪除收藏', { icon: '❌' });
           }
@@ -336,14 +363,18 @@ function Product() {
               margin: '10px',
             },
           }}
-        />{' '}
+        />
         <MainImage src={product.main_image} />
         <Details>
           <Title>{product.title}</Title>
           <ID>{product.id}</ID>
           <Price>
             TWD.{product.price}
-            <HeartIcon className='material-icons' onClick={toggleLike} $isLiked={isLiked}>
+            <HeartIcon
+              className="material-icons"
+              onClick={toggleLike}
+              $isLiked={isLiked}
+            >
               {isLiked ? ' favorite' : 'favorite_border'}
             </HeartIcon>
           </Price>
