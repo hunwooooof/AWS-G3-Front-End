@@ -407,13 +407,13 @@ const SelectCouponButton = styled.button`
   border-radius: 100%;
   border: 1px #bababa solid;
   cursor: pointer;
-  background-color: ${(props) => (props.isActive ? '#dc5f45' : '#f0f0f0')};
+  background-color: ${(props) => (props.isActive ? '#f58c76' : '#f0f0f0')};
   @media screen and (max-width: 1279px) {
     width: 15px;
     height: 15px;
     min-width: 15px;
     min-height: 15px;
-    margin: auto 1rem;
+    margin: auto 1rem auto auto;
   }
 `;
 
@@ -497,12 +497,19 @@ function Checkout() {
   useEffect(() => {
     const setupTappay = async () => {
       await tappay.setupSDK();
-      tappay.setupCard(cardNumberRef.current, cardExpirationDateRef.current, cardCCVRef.current);
+      tappay.setupCard(
+        cardNumberRef.current,
+        cardExpirationDateRef.current,
+        cardCCVRef.current,
+      );
     };
     setupTappay();
   }, []);
 
-  const subtotal = cartItems.reduce((prev, item) => prev + item.price * item.qty, 0);
+  const subtotal = cartItems.reduce(
+    (prev, item) => prev + item.price * item.qty,
+    0,
+  );
 
   const freight = 30;
 
@@ -530,7 +537,9 @@ function Checkout() {
 
       if (Object.values(recipient).some((value) => !value)) {
         window.alert('請填寫完整訂購資料');
-        setInvalidFields(Object.keys(recipient).filter((key) => !recipient[key]));
+        setInvalidFields(
+          Object.keys(recipient).filter((key) => !recipient[key]),
+        );
         formRef.current.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
@@ -548,7 +557,8 @@ function Checkout() {
         window.alert('付款資料輸入有誤');
         return;
       }
-      const finalFreight = selectedCoupon && selectedCoupon.type === '免運' ? 0 : freight;
+      const finalFreight =
+        selectedCoupon && selectedCoupon.type === '免運' ? 0 : freight;
       const finalSubtotal =
         selectedCoupon && selectedCoupon.type === '折扣'
           ? Math.floor(subtotal - (subtotal * selectedCoupon.discount) / 100)
@@ -629,7 +639,9 @@ function Checkout() {
               <FormLabel>{input.label}</FormLabel>
               <FormControl
                 value={recipient[input.key]}
-                onChange={(e) => setRecipient({ ...recipient, [input.key]: e.target.value })}
+                onChange={(e) =>
+                  setRecipient({ ...recipient, [input.key]: e.target.value })
+                }
                 invalid={invalidFields.includes(input.key)}
               />
               {input.text && <FormText>{input.text}</FormText>}
@@ -640,10 +652,11 @@ function Checkout() {
             {timeOptions.map((option) => (
               <FormCheck key={option.value}>
                 <FormCheckInput
-                  type='radio'
+                  type="radio"
                   checked={recipient.time === option.value}
                   onChange={(e) => {
-                    if (e.target.checked) setRecipient({ ...recipient, time: option.value });
+                    if (e.target.checked)
+                      setRecipient({ ...recipient, time: option.value });
                   }}
                 />
                 <FormCheckLabel>{option.label}</FormCheckLabel>
@@ -655,15 +668,15 @@ function Checkout() {
           <FormLegend>付款資料</FormLegend>
           <FormGroup>
             <FormLabel>信用卡號碼</FormLabel>
-            <FormControl as='div' ref={cardNumberRef} />
+            <FormControl as="div" ref={cardNumberRef} />
           </FormGroup>
           <FormGroup>
             <FormLabel>有效期限</FormLabel>
-            <FormControl as='div' ref={cardExpirationDateRef} />
+            <FormControl as="div" ref={cardExpirationDateRef} />
           </FormGroup>
           <FormGroup>
             <FormLabel>安全碼</FormLabel>
-            <FormControl as='div' ref={cardCCVRef} />
+            <FormControl as="div" ref={cardCCVRef} />
           </FormGroup>
         </FormFieldSet>
       </form>
@@ -674,7 +687,8 @@ function Checkout() {
           <CouponButton
             onClick={() => {
               setIsSelectingCoupon(!isSelectingCoupon);
-            }}>
+            }}
+          >
             選擇優惠券
           </CouponButton>
         ) : (
@@ -682,12 +696,15 @@ function Checkout() {
             <span style={{ color: 'black', marginRight: '1rem' }}>已選取</span>
             <span style={{ color: '#8b572a' }}>
               {selectedCoupon.title} {selectedCoupon.type}券
-              {selectedCoupon.type === '折扣' ? `（ ${selectedCoupon.discount}% off ）` : ''}
+              {selectedCoupon.type === '折扣'
+                ? `（ ${selectedCoupon.discount}% off ）`
+                : ''}
             </span>
             <ChangeSelectedCouponButton
               onClick={() => {
                 setIsSelectingCoupon(!isSelectingCoupon);
-              }}>
+              }}
+            >
               變更
             </ChangeSelectedCouponButton>
           </SelectedCouponWrap>
@@ -701,8 +718,19 @@ function Checkout() {
               {validCoupon && validCoupon.length > 0 ? (
                 validCoupon.map((coupon, index) => {
                   return (
-                    <Coupon key={coupon.id}>
-                      <CouponImage src={coupon.type === '免運' ? freeFreightImage : discountImage}></CouponImage>
+                    <Coupon
+                      key={coupon.id}
+                      onClick={() => {
+                        setRedButtonIndex(index);
+                      }}
+                    >
+                      <CouponImage
+                        src={
+                          coupon.type === '免運'
+                            ? freeFreightImage
+                            : discountImage
+                        }
+                      ></CouponImage>
                       <CouponInfo>
                         <CouponTitle>{coupon.title}</CouponTitle>
 
@@ -715,7 +743,8 @@ function Checkout() {
                         isActive={index === redButtonIndex}
                         onClick={() => {
                           setRedButtonIndex(index);
-                        }}></SelectCouponButton>
+                        }}
+                      ></SelectCouponButton>
                     </Coupon>
                   );
                 })
@@ -727,7 +756,8 @@ function Checkout() {
                     style={{
                       fontSize: '16px',
                       marginTop: '10px',
-                    }}>
+                    }}
+                  >
                     前往
                     <EmptyLink to={`/coupon`}>優惠券專區</EmptyLink>
                     領取
@@ -740,7 +770,8 @@ function Checkout() {
               <Cancel
                 onClick={() => {
                   setIsSelectingCoupon(!isSelectingCoupon);
-                }}>
+                }}
+              >
                 取消
               </Cancel>
               {validCoupon && validCoupon.length > 0 ? (
@@ -784,7 +815,9 @@ function Checkout() {
       <TotalPrice>
         <PriceName>應付金額</PriceName>
         <Currency>NT.</Currency>
-        <PriceValue>{subtotal + freight + (selectedCoupon && couponDiscount())}</PriceValue>
+        <PriceValue>
+          {subtotal + freight + (selectedCoupon && couponDiscount())}
+        </PriceValue>
       </TotalPrice>
       <Button loading={loading} onClick={checkout}>
         確認付款
