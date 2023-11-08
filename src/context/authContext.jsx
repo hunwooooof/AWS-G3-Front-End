@@ -41,7 +41,7 @@ export const AuthContextProvider = ({ children }) => {
       if (response.status === 'connected') {
         handleLoginResponse(response);
         setLoading(false);
-      } else if (currentToken) {
+      } else if (currentToken !== null) {
         const response = await ec2Api.getProfile(currentToken);
         if (response.data) {
           setUser(response.data);

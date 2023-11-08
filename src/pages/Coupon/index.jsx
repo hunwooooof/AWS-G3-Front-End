@@ -274,7 +274,7 @@ function Coupon() {
         }
         getUserValidCoupons();
       } else if (response.errors) {
-        toast.error(response.errors);
+        response.errors === '優惠券已經被搶完了！' ? toast.error(response.errors) : toast.error('領取失敗！再試一次！');
       }
     }
     isLogin ? postClaimCoupon() : toast('請先登入', { icon: '❗️' });
