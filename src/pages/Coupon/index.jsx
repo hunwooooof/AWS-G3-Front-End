@@ -149,6 +149,10 @@ const Discount = styled.div`
   font-size: 18px;
   margin-top: 10px;
   margin-bottom: auto;
+  @media screen and (max-width: 479px) {
+    font-size: 12px;
+    margin-top: 5px;
+  }
 `;
 
 const ExpireDate = styled.div`

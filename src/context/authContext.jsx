@@ -43,12 +43,13 @@ export const AuthContextProvider = ({ children }) => {
         setLoading(false);
       } else if (currentToken) {
         const response = await ec2Api.getProfile(currentToken);
-        if (response) {
+        if (response.data) {
           setUser(response.data);
           setJwtToken(currentToken);
-          // window.localStorage.setItem('jwtToken', accessToken);
           setLoading(false);
           setIsLogin(true);
+        } else if (response.error) {
+          setLoading(false);
         }
       } else {
         window.localStorage.removeItem('jwtToken');
@@ -117,8 +118,7 @@ export const AuthContextProvider = ({ children }) => {
         login,
         nativeLogin,
         logout,
-      }}
-    >
+      }}>
       {children}
     </AuthContext.Provider>
   );

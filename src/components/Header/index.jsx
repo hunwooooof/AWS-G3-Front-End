@@ -9,6 +9,7 @@ import logo from './logo.png';
 import profileMobile from './profile-mobile.png';
 import profile from './profile.png';
 import search from './search.png';
+import defaultPicture from './user-default.png';
 import CouponBtn from './CouponBtn';
 import ec2Api from '../../utils/ec2Api';
 
