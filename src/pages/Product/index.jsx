@@ -293,26 +293,23 @@ function Product() {
     const changeCollection = async function () {
       if (product) {
         const localCollection = JSON.parse(localStorage.getItem('collection'));
-        const updatedList = localCollection.filter((item) => item.id !== product.id);
         if (isLiked) {
           if (isLogin) {
             const response = await ec2Api.addCollection(product.id, jwtToken);
             if (response.message === '已加入收藏') toast.success(response.message);
-          } else {
-            const isLocalCollected = localCollection.find((item) => {
-              return item.id === product.id;
-            });
-            if (!isLocalCollected) {
-              const updatedCollection = [...localCollection, product];
-              localStorage.setItem('collection', JSON.stringify(updatedCollection));
-              toast.success('已加入收藏');
-            }
+          }
+          if (!isLogin && !localCollection.some((each) => each.id === product.id)) {
+            const updatedCollection = [...localCollection, product];
+            localStorage.setItem('collection', JSON.stringify(updatedCollection));
+            toast.success('已加入收藏');
           }
         } else {
           if (isLogin) {
             const response = await ec2Api.deleteCollection(product.id, jwtToken);
             toast(response.message, { icon: '❌' });
-          } else {
+          }
+          if (!isLogin && localCollection.some((each) => each.id === product.id)) {
+            const updatedList = localCollection.filter((item) => item.id !== product.id);
             localStorage.setItem('collection', JSON.stringify(updatedList));
             toast('已刪除收藏', { icon: '❌' });
           }
@@ -329,7 +326,7 @@ function Product() {
       <Wrapper>
         <Toaster
           toastOptions={{
-            duration: 1000,
+            duration: 500,
             style: {
               background: '#ebebebe8',
               padding: '5px 10px',

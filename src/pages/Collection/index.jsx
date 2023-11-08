@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import Product from './Product';
+import ReactLoading from 'react-loading';
 import Title from './Title';
 import ec2Api from '../../utils/ec2Api';
 import { useEffect, useState } from 'react';
@@ -29,23 +30,33 @@ const Warning = styled.div`
   }
 `;
 
+const Loading = styled(ReactLoading)`
+  margin: 0 auto;
+  margin-top: 100px;
+`;
+
 const Collection = () => {
   const { isLogin, jwtToken } = useContext(AuthContext);
-  const [collection, setCollection] = useState([]);
+  const [collection, setCollection] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setIsLoading(true);
     async function getCollection() {
       const localCollection = JSON.parse(localStorage.getItem('collection'));
       if (isLogin && localCollection) {
         localCollection.forEach((item) => ec2Api.addCollection(item.id, jwtToken));
         setTimeout(() => {
           ec2Api.getCollection(jwtToken).then((res) => setCollection(res.data));
+          setIsLoading(false);
         }, 800);
         localStorage.removeItem('collection');
       } else if (isLogin) {
-        ec2Api.getCollection(jwtToken).then((res) => setCollection(res.data));
+        ec2Api.getCollection(jwtToken).then((res) => setCollection(res.data || []));
+        setIsLoading(false);
       } else {
-        setCollection(localCollection);
+        setCollection(localCollection || []);
+        setIsLoading(false);
       }
     }
     getCollection();
@@ -54,6 +65,7 @@ const Collection = () => {
   return (
     <Wrap>
       <Title />
+      {isLoading && <Loading type='spinningBubbles' color='#313538' />}
       {collection &&
         collection.map((productInfo) => {
           return (
@@ -65,7 +77,7 @@ const Collection = () => {
             />
           );
         })}
-      {collection.length === 0 && <Warning>目前沒有收藏的商品！</Warning>}
+      {!isLoading && collection && collection.length === 0 && <Warning>目前沒有收藏的商品！</Warning>}
     </Wrap>
   );
 };

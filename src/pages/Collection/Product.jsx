@@ -53,56 +53,80 @@ const HeartIcon = styled.span`
 const Product = ({ collection, setCollection, productInfo }) => {
   const { isLogin, jwtToken } = useContext(AuthContext);
   const [isLiked, setIsLiked] = useState(true);
+
   const toggleLike = async () => {
     setIsLiked(!isLiked);
   };
 
   useEffect(() => {
     const localCollection = JSON.parse(localStorage.getItem('collection'));
-    if (isLiked && !collection.includes(productInfo)) {
-      if (isLogin) {
-        const checkIsCollected = async () => {
-          const isCollected = (await ec2Api.getCollection()).data.find((item) => {
-            return item.id === productInfo.id;
-          });
-          if (!isCollected) {
-            ec2Api.addCollection(productInfo.id);
-          }
-        };
-        console.log('hi');
-        checkIsCollected();
-      } else {
-        const isLocalCollected = localCollection.find((item) => {
-          return item.id === productInfo.id;
-        });
-        if (!isLocalCollected) {
-          localStorage.setItem('collection', JSON.stringify([...localCollection, productInfo]));
-        }
-      }
-    }
+    // 如果要新增收藏
+    // if (isLiked && !collection.includes(productInfo)) {
+    //   if (isLogin) {
+    //     async function addCollection() {
+    //       const response = await ec2Api.addCollection(productInfo.id, jwtToken);
+    //       if (response.success) {
+    //         toast.success('已加入收藏');
+    //         async function getCollection() {
+    //           const response = await ec2Api.getCollection(jwtToken);
+    //           if (response.success) {
+    //             console.log(response.data);
+    //             setCollection(response.data);
+    //           }
+    //         }
+    //         getCollection();
+    //       }
+    //     }
+    //     addCollection();
+    //   } else {
+    //     const isLocalCollected = localCollection.find((item) => {
+    //       return item.id === productInfo.id;
+    //     });
+    //     if (!isLocalCollected) {
+    //       localStorage.setItem('collection', JSON.stringify([...localCollection, productInfo]));
+    //     }
+    //   }
+    // }
     if (!isLiked && collection.includes(productInfo)) {
       if (isLogin) {
         async function deleteCollection() {
           const response = await ec2Api.deleteCollection(productInfo.id, jwtToken);
-          if (response.success) toast(response.message);
-          async function getCollection() {
-            const response = await ec2Api.getCollection(jwtToken);
-            if (response.data) setCollection(response.data);
-            else setCollection(false);
+          if (response.success) {
+            toast('已刪除收藏', { icon: '❌' });
+            async function getCollection() {
+              const response = await ec2Api.getCollection(jwtToken);
+              if (response.data) {
+                setCollection(response.data);
+              } else if (response.message === 'no collection items') setCollection([]);
+            }
+            getCollection();
           }
-          getCollection();
         }
         deleteCollection();
       } else {
         const updatedList = localCollection.filter((item) => item.id !== productInfo.id);
         localStorage.setItem('collection', JSON.stringify(updatedList));
+        setCollection(updatedList);
+        toast('已刪除收藏', { icon: '❌' });
       }
     }
   }, [isLiked]);
 
   return (
     <Wrapper to={`/products/${productInfo.id}`}>
-      <Toaster />
+      <Toaster
+        toastOptions={{
+          duration: 1000,
+          style: {
+            background: '#ebebebd1',
+            padding: '5px 10px',
+            textAlign: 'center',
+            color: '#181818',
+            fontSize: '28px',
+            margin: '10px',
+          },
+        }}
+      />
       <Image src={productInfo.main_image} />
       <Details>
         <Title>{productInfo.title}</Title>
