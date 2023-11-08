@@ -22,6 +22,8 @@ const Title = styled.div`
 
 const Photo = styled.img`
   margin-top: 24px;
+  width: 200px;
+  border-radius: 50%;
 `;
 
 const Content = styled.div`
@@ -103,8 +105,7 @@ const Loading = styled(ReactLoading)`
 `;
 
 function Profile() {
-  const { user, isLogin, login, nativeLogin, logout, loading } =
-    useContext(AuthContext);
+  const { user, isLogin, login, nativeLogin, logout, loading } = useContext(AuthContext);
   const [isNativeShow, setIsNativeLoginShow] = useState(false);
   const [loginInfo, setLoginInfo] = useState({
     provider: 'native',
@@ -113,7 +114,7 @@ function Profile() {
   });
 
   const renderContent = () => {
-    if (loading) return <Loading type="spinningBubbles" color="#313538" />;
+    if (loading) return <Loading type='spinningBubbles' color='#313538' />;
     if (isLogin)
       return (
         <>
@@ -128,14 +129,13 @@ function Profile() {
         <Text>選擇登入方式</Text>
         <LogIn>
           <Btn onClick={login}>
-            <img src={facebookImgUrl} width={50} alt="facebook-logo" />
+            <img src={facebookImgUrl} width={50} alt='facebook-logo' />
           </Btn>
           <Btn
             onClick={() => {
               setIsNativeLoginShow(!isNativeShow);
-            }}
-          >
-            <img src={sImgUrl} width={50} alt="stylish-s-logo" />
+            }}>
+            <img src={sImgUrl} width={50} alt='stylish-s-logo' />
           </Btn>
         </LogIn>
         {isNativeShow && (
@@ -144,8 +144,8 @@ function Profile() {
               <Label>Email</Label>
               <Input
                 value={loginInfo.email}
-                type="email"
-                name="email"
+                type='email'
+                name='email'
                 onChange={(e) => {
                   setLoginInfo({ ...loginInfo, email: e.target.value });
                 }}
@@ -155,8 +155,8 @@ function Profile() {
               <Label>Password</Label>
               <Input
                 value={loginInfo.password}
-                type="text"
-                name="password"
+                type='text'
+                name='password'
                 onChange={(e) => {
                   setLoginInfo({ ...loginInfo, password: e.target.value });
                 }}
@@ -164,11 +164,10 @@ function Profile() {
             </LogIn>
             <LogIn>
               <NativeBtn
-                type="submit"
+                type='submit'
                 onClick={() => {
                   nativeLogin(loginInfo);
-                }}
-              >
+                }}>
                 登入
               </NativeBtn>
             </LogIn>
