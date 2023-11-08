@@ -293,6 +293,9 @@ const SelectWindowBackground = styled.div`
   z-index: 100;
   width: 100%;
   padding: 10rem 8rem;
+  @media screen and (max-width: 1279px) {
+    padding: 5rem 2rem;
+  }
 `;
 const SelectWindow = styled.div`
   position: relative;
@@ -305,11 +308,14 @@ const SelectWindow = styled.div`
   display: flex;
   flex-direction: column;
   @media screen and (max-width: 1279px) {
-    min-height: 600px;
+    min-height: 60px;
   }
 `;
 const SelectWindowTitle = styled.div`
   font-size: 30px;
+  @media screen and (max-width: 1279px) {
+    font-size: 20px;
+  }
 `;
 const ButtonWrap = styled.div`
   bottom: 2rem;
@@ -330,6 +336,8 @@ const Cancel = styled.button`
   border: 1px #bababa solid;
   color: #bababa;
   margin-right: 0.5rem;
+  cursor: pointer;
+
   @media screen and (max-width: 1279px) {
     margin-right: 0;
     max-width: 100%;
@@ -341,6 +349,7 @@ const Confirm = styled.button`
   background-color: #313538;
   color: white;
   border: none;
+  cursor: pointer;
   @media screen and (max-width: 1279px) {
     max-width: 100%;
   }
@@ -358,6 +367,9 @@ const Coupon = styled.div`
   background-color: #f0f0f0;
   height: 10rem;
   display: flex;
+  @media screen and (max-width: 1279px) {
+    height: 7rem;
+  }
 `;
 
 const CouponImage = styled.img`
@@ -372,20 +384,37 @@ const CouponInfo = styled.div`
 `;
 const CouponTitle = styled.p`
   font-size: 20px;
+  @media screen and (max-width: 1279px) {
+    font-size: 16px;
+  }
 `;
 const CouponDate = styled.p`
   color: #bababa;
+  @media screen and (max-width: 1279px) {
+    font-size: 12px;
+  }
+  @media screen and (max-width: 480px) {
+    font-size: 9px;
+  }
 `;
 
 const SelectCouponButton = styled.button`
   margin: auto 1.5rem auto auto;
   width: 20px;
   height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   border-radius: 100%;
   border: 1px #bababa solid;
   cursor: pointer;
-
   background-color: ${(props) => (props.isActive ? '#dc5f45' : '#f0f0f0')};
+  @media screen and (max-width: 1279px) {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
+    margin: auto 1rem;
+  }
 `;
 
 const SelectedCouponWrap = styled.div`
@@ -408,6 +437,9 @@ const EmptyMessage = styled.p`
   align-items: center;
   color: #bababa;
   letter-spacing: 1.5px;
+  @media screen and (max-width: 1279px) {
+    font-size: 20px;
+  }
 `;
 const EmptyLink = styled(Link)`
   color: #6da6e0;
@@ -673,7 +705,11 @@ function Checkout() {
                       <CouponImage src={coupon.type === '免運' ? freeFreightImage : discountImage}></CouponImage>
                       <CouponInfo>
                         <CouponTitle>{coupon.title}</CouponTitle>
-                        <CouponDate>有效日期 {coupon.expiredDate}</CouponDate>
+
+                        <CouponDate>
+                          有效日期{' '}
+                          {coupon.expiredDate.match(/^\d{4}-\d{2}-\d{2}/)[0]}
+                        </CouponDate>
                       </CouponInfo>
                       <SelectCouponButton
                         isActive={index === redButtonIndex}
@@ -707,13 +743,18 @@ function Checkout() {
                 }}>
                 取消
               </Cancel>
-              <Confirm
-                onClick={() => {
-                  setSelectedCoupon(validCoupon[redButtonIndex]);
-                  setIsSelectingCoupon(!isSelectingCoupon);
-                }}>
-                好
-              </Confirm>
+              {validCoupon && validCoupon.length > 0 ? (
+                <Confirm
+                  onClick={() => {
+                    setSelectedCoupon(validCoupon[redButtonIndex]);
+                    setIsSelectingCoupon(!isSelectingCoupon);
+                  }}
+                >
+                  好
+                </Confirm>
+              ) : (
+                <></>
+              )}
             </ButtonWrap>
           </SelectWindow>
         </SelectWindowBackground>

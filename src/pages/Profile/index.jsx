@@ -46,6 +46,12 @@ const LogIn = styled.div`
   gap: 40px;
   justify-content: center;
   align-items: center;
+  @media screen and (max-width: 1279px) {
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 300px;
+    padding: 0 10px;
+  }
 `;
 
 const Label = styled.label`
@@ -55,6 +61,11 @@ const Label = styled.label`
   text-align: end;
   color: #3f3a3a;
   letter-spacing: 1.2px;
+  @media screen and (max-width: 1279px) {
+    width: 100%;
+    text-align: start;
+    margin: 20px 0 10px 0;
+  }
 `;
 
 const Input = styled.input`
@@ -66,11 +77,17 @@ const Input = styled.input`
   font-size: 20px;
   color: #8b572a;
   letter-spacing: 1.2px;
+  @media screen and (max-width: 1279px) {
+    width: 100%;
+  }
 `;
 
 const Btn = styled.a`
   cursor: pointer;
   margin-bottom: 100px;
+  @media screen and (max-width: 1279px) {
+    margin-bottom: 50px;
+  }
 `;
 
 const NativeBtn = styled(Btn)`

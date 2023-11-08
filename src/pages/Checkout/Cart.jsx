@@ -104,6 +104,7 @@ const ItemName = styled.div``;
 
 const ItemID = styled.div`
   margin-top: 18px;
+  color: #bababa;
 `;
 
 const ItemColorName = styled.div`
@@ -219,7 +220,7 @@ function Cart() {
             ...item,
             qty: itemQuantity,
           }
-        : item
+        : item,
     );
     setCartItems(newCartItems);
     window.alert('已修改數量');

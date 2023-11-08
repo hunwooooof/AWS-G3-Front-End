@@ -188,6 +188,18 @@ const NoMore = styled(Warning)`
   margin-top: 0px;
 `;
 
+const MyToaster = styled(Toaster)`
+  background: #ebebebd1;
+  padding: 5px 10px;
+  text-align: center;
+  color: #181818;
+  font-size: 28px;
+  margin: 10px;
+  @media screen and (max-width: 1279px) {
+    font-size: 1px;
+  }
+`;
+
 function Coupon() {
   const { isLogin, jwtToken } = useContext(AuthContext);
   const [couponsTag, setCouponsTag] = useState('All');
@@ -196,7 +208,11 @@ function Coupon() {
   const [userValidCoupons, setUserValidCoupons] = useState(null);
   const [userInvalidCoupons, setUserInvalidCoupons] = useState(null);
   const coupons =
-    couponsTag === 'All' ? allCoupons : couponsTag === 'UserCoupons' ? userValidCoupons : userInvalidCoupons;
+    couponsTag === 'All'
+      ? allCoupons
+      : couponsTag === 'UserCoupons'
+      ? userValidCoupons
+      : userInvalidCoupons;
 
   useEffect(() => {
     async function getAllCoupons() {
@@ -318,27 +334,27 @@ function Coupon() {
   return (
     <Wrapper>
       <Title>優惠券專區</Title>
-      <Toaster
+      <MyToaster
         toastOptions={{
           duration: 1000,
-          style: {
-            background: '#ebebebd1',
-            padding: '5px 10px',
-            textAlign: 'center',
-            color: '#181818',
-            fontSize: '28px',
-            margin: '10px',
-          },
         }}
       />
       <SubTitle>
-        <Tag id='All' onClick={handleCouponTag} $isActive={couponsTag === 'All'}>
+        <Tag
+          id="All"
+          onClick={handleCouponTag}
+          $isActive={couponsTag === 'All'}
+        >
           未領取
         </Tag>
         <Tag id='UserCoupons' onClick={handleCouponTag} $isActive={couponsTag === 'UserCoupons'}>
           已領取 {userValidCoupons && `(${userValidCoupons.length})`}
         </Tag>
-        <Tag id='CouponHistory' onClick={handleCouponTag} $isActive={couponsTag === 'CouponHistory'}>
+        <Tag
+          id="CouponHistory"
+          onClick={handleCouponTag}
+          $isActive={couponsTag === 'CouponHistory'}
+        >
           歷史紀錄
         </Tag>
       </SubTitle>
