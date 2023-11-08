@@ -143,6 +143,13 @@ const GetButton = styled.button`
   }
 `;
 
+const Discount = styled.div`
+  color: #f08383;
+  letter-spacing: 2px;
+  font-size: 18px;
+  margin-bottom: auto;
+`;
+
 const ExpireDate = styled.div`
   font-size: 24px;
   color: #504d4d;
@@ -160,6 +167,8 @@ const Warning = styled.div`
   margin-top: 50px;
   text-align: center;
   font-size: 20px;
+  padding: 10px 20px;
+
   @media screen and (max-width: 1279px) {
     font-size: 12px;
     letter-spacing: 1px;
@@ -290,6 +299,7 @@ function Coupon() {
                       {couponsTag === 'CouponHistory' && coupon.isUsed === 1 && <NoMore>已使用</NoMore>}
                       {couponsTag === 'CouponHistory' && !coupon.isUsed && <NoMore>已逾期</NoMore>}
                     </ItemInfo>
+                    <Discount>{coupon.type === '折扣' ? coupon.discount + '% off' : '免運'}</Discount>
                     <ExpireDate>有效期限：{expiredDate}</ExpireDate>
                   </ItemDetail>
                 </Item>

@@ -649,10 +649,9 @@ function Checkout() {
           <SelectedCouponWrap>
             <span style={{ color: 'black', marginRight: '1rem' }}>已選取</span>
             <span style={{ color: '#8b572a' }}>
-              {selectedCoupon.title} {selectedCoupon.type}券 （{selectedCoupon.discount}
-              {selectedCoupon.type === '折扣' ? '% off' : ''} ）
+              {selectedCoupon.title} {selectedCoupon.type}券
+              {selectedCoupon.type === '折扣' ? `（ ${selectedCoupon.discount}% off ）` : ''}
             </span>
-
             <ChangeSelectedCouponButton
               onClick={() => {
                 setIsSelectingCoupon(!isSelectingCoupon);
