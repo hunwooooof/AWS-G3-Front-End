@@ -35,12 +35,23 @@ export const AuthContextProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    const currentToken = localStorage.getItem('jwtToken') || null;
+    console.log(currentToken);
     const checkAuthStatus = async () => {
       await fb.init();
       const response = await fb.getLoginStatus();
       if (response.status === 'connected') {
         handleLoginResponse(response);
         setLoading(false);
+      } else if (currentToken) {
+        const response = await ec2Api.getProfile(currentToken);
+        if (response) {
+          setUser(response.data);
+          setJwtToken(currentToken);
+          // window.localStorage.setItem('jwtToken', accessToken);
+          setLoading(false);
+          setIsLogin(true);
+        }
       } else {
         window.localStorage.removeItem('jwtToken');
         setLoading(false);
