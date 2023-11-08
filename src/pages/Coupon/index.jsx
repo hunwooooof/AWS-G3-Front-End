@@ -97,7 +97,7 @@ const ItemDetail = styled.div`
     padding: 10% 30px;
   }
   @media screen and (max-width: 479px) {
-    padding: 30px 10px;
+    padding: 18px 10px;
   }
 `;
 
@@ -144,7 +144,7 @@ const GetButton = styled.button`
 `;
 
 const Discount = styled.div`
-  color: #f08383;
+  color: #bc6946;
   letter-spacing: 2px;
   font-size: 18px;
   margin-top: 10px;
@@ -177,6 +177,9 @@ const Warning = styled.div`
   @media screen and (max-width: 1279px) {
     font-size: 12px;
     letter-spacing: 1px;
+  }
+  @media screen and (max-width: 479px) {
+    padding: 0;
   }
 `;
 

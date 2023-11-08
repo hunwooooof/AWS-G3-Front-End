@@ -12,12 +12,20 @@ const Wrapper = styled(Link)`
   display: flex;
   margin-bottom: 28px;
   text-decoration: none;
+
+  @media screen and (max-width: 479px) {
+    height: 130px;
+  }
 `;
+
 const Image = styled.img`
   height: 100%;
   margin-right: 31px;
 `;
-const Details = styled.div``;
+
+const Detail = styled.div`
+  width: 130px;
+`;
 
 const Title = styled.p`
   color: #3f3a3a;
@@ -30,7 +38,12 @@ const Title = styled.p`
     margin: 4px 0;
     font-size: 20px;
   }
+
+  @media screen and (max-width: 479px) {
+    letter-spacing: 2.4px;
+  }
 `;
+
 const Price = styled.p`
   color: #8d8989;
   font-size: 26px;
@@ -39,6 +52,7 @@ const Price = styled.p`
     font-size: 20px;
   }
 `;
+
 const HeartIcon = styled.span`
   font-family: 'Material Icons';
   font-size: 54px;
@@ -47,6 +61,10 @@ const HeartIcon = styled.span`
   color: ${(props) => (props.$isLiked ? '#d25e5a' : '#787575')};
   @media screen and (max-width: 1279px) {
     font-size: 36px;
+  }
+
+  @media screen and (max-width: 479px) {
+    font-size: 30px;
   }
 `;
 
@@ -128,10 +146,10 @@ const Product = ({ collection, setCollection, productInfo }) => {
         }}
       />
       <Image src={productInfo.main_image} />
-      <Details>
+      <Detail>
         <Title>{productInfo.title}</Title>
         <Price>NT. {productInfo.price}</Price>
-      </Details>
+      </Detail>
       <HeartIcon
         className='material-icons'
         onClick={(e) => {

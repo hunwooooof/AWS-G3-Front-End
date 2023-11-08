@@ -22,11 +22,7 @@ const Close = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   font-family: 'Material Icons';
   border-radius: 50%;
   background-color: #9d9d9d9d;
@@ -37,6 +33,10 @@ const Close = styled.div`
   @media screen and (max-width: 1279px) {
     width: 20px;
     height: 20px;
+  }
+  @media screen and (max-width: 479px) {
+    right: -28px;
+    top: -140px;
   }
 `;
 
@@ -60,6 +60,10 @@ const Button = styled(Link)`
     width: 60px;
     height: 60px;
   }
+  @media screen and (max-width: 479px) {
+    right: -23px;
+    top: -137px;
+  }
 `;
 
 const Img = styled.img`
@@ -81,8 +85,8 @@ function CouponBtn() {
         <Container>
           <Wrapper>
             <Close onClick={handleClick}>close</Close>
-            <Button to="/coupon" onClick={handleClick}>
-              <Img src={couponIcon} alt="coupon-icon" />
+            <Button to='/coupon' onClick={handleClick}>
+              <Img src={couponIcon} alt='coupon-icon' />
             </Button>
           </Wrapper>
         </Container>
