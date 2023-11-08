@@ -1,4 +1,4 @@
-import api from './api';
+import ec2Api from './ec2Api';
 import fb from './fb';
 
 async function getJwtToken() {
@@ -15,7 +15,7 @@ async function getJwtToken() {
       throw new Error('登入失敗');
     }
   }
-  const { data } = await api.signin({
+  const { data } = await ec2Api.signin({
     provider: 'facebook',
     access_token: accessToken,
   });
